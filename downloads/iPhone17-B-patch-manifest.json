@@ -1,0 +1,36 @@
+{
+  "baseline": "VVebo 15A",
+  "scope": "User-approved disablement of unavailable CloudKit container requests; networking framework unchanged",
+  "instruction_patches": [
+    {
+      "file_offset": "0x3096b4",
+      "before": "b16f0994",
+      "after": "000080d2"
+    },
+    {
+      "file_offset": "0x309c04",
+      "before": "5d6e0994",
+      "after": "000080d2"
+    },
+    {
+      "file_offset": "0x309d0c",
+      "before": "1b6e0994",
+      "after": "000080d2"
+    },
+    {
+      "file_offset": "0x30a4c0",
+      "before": "2e6c0994",
+      "after": "000080d2"
+    },
+    {
+      "file_offset": "0x30ba70",
+      "before": "c2660994",
+      "after": "000080d2"
+    },
+    {
+      "file_offset": "0x30bd20",
+      "before": "16660994",
+      "after": "000080d2"
+    }
+  ]
+}
