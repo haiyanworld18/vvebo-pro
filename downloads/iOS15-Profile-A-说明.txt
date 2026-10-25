@@ -1,0 +1,35 @@
+VVebo iOS 15 主页修复 A：首轮测试包
+
+验证目标已由用户选定：iPhone 13 Pro Max / iOS 15 / TrollStore。
+原始 IPA 的 SHA-256 为 6e497fb4c6e264e66b05a3289f1eed9958a0cea7792fbaf00e1484fcd31e4ed5，用户确认它在此环境可正常运行。
+这不是已在设备验证成功的修复版。当前只修主页，不做新机分辨率、窗口、屏幕或系统版本适配。
+
+本轮重新实现
+- 使用全新的 VVProfile15.framework，不含此前 VVeboPatch.framework 或其自定义存储类。
+- 用系统 imp_implementationWithBlock 为每个方法封装其准确的原实现地址。
+- 登记信息仅放在受原子锁保护的固定 C 数组中，不在类对象上关联自定义方法指针对象。
+- 对重复登记和继承链分别处理；登记空间不足或方法缺失时跳过该改动。
+- 响应缓存直接使用系统 NSMutableData，仅关联到实际改写的网络任务。
+- 请求和响应转换仍依据用户确认有效的 bin64 QX 脚本：
+  https://raw.githubusercontent.com/bin64/Scripts/main/QuantumultX/vvebo.js
+- 无窗口/屏幕方法修改，无新增代理服务，不记录鉴权数据。
+
+安装和验证
+1. 在 iPhone 13 Pro Max / iOS 15 上，通过原来可用的 TrollStore 安装这份 IPA。
+2. 桌面名称应显示 VVebo 15A，构建号 4.1501。无需先卸载原 App，也不要先删除数据。
+3. 先检查能否正常打开；能打开后，关闭 QX 中 VVebo 专用重写，再检查其他博主的主页微博列表。
+4. 再检查下拉刷新、继续向下翻页，以及首页微博流。
+5. 反馈能否打开、主页是否有微博即可；此阶段不要求主动收集日志。
+
+当前包沿用原 Bundle ID，因此不是可与原版并排安装的另一个 App。保留原始 IPA；需要恢复时，按原 TrollStore 安装方式恢复原包。
+
+已完成的验证
+- 警告视为错误的 arm64 Objective-C 编译，标准 LLVM LLD Framework 链接。
+- 真实编译后的 Install 函数在 ARM64 Unicorn 中执行：覆盖原实现地址捕获、重复登记、继承方法、不同类、方法缺失及容量用尽。
+- 上述模拟的系统运行时 API 和 builder block 由测试替身提供，未验证 Apple block trampoline 或完整 Foundation 行为。
+- ZIP、原程序指令保留、精确变更范围、元信息、加载路径、16 KB 段布局、构造入口、系统库符号来源、代码页/资源签名结构检查。
+- 检查编译输出中不存在窗口方法、UIWindow 导入、自定义类元数据及旧补丁模块。
+
+未完成的验证
+TrollStore 在这台设备上对本包的安装与签名接受、真实启动、实际主页接口/刷新/翻页及其他页面行为。
+不能将离线检查通过描述为真机可用。待本轮稳定后再处理新 iPhone 显示问题。
