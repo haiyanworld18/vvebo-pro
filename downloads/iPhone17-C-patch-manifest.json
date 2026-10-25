@@ -1,0 +1,20 @@
+{
+  "baseline": "17B",
+  "scope": "User-approved cloud feature disablement: bypass login/account-view cloud query entry points without writing account or purchase flags",
+  "instruction_patches": [
+    {
+      "file_offset": "0x241944",
+      "original_target": "0x32b410",
+      "before": "b3a60394",
+      "after": "1f2003d5",
+      "purpose": "Do not issue unavailable cloud account metadata query; retain existing local state and caller cleanup"
+    },
+    {
+      "file_offset": "0xc9220",
+      "original_target": "0x32baac",
+      "before": "238a0994",
+      "after": "1f2003d5",
+      "purpose": "Do not issue unavailable cloud account metadata query; retain existing local state and caller cleanup"
+    }
+  ]
+}
