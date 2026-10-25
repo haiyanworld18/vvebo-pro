@@ -1,0 +1,18 @@
+{
+  "VVebo-3.3.31-iPhone17-CloudCompat-D.ipa": {
+    "bytes": 22504828,
+    "sha256": "7da21e52acf954bfe97cb2493c1461b695fcabb0396be51628a8797a938eacc0"
+  },
+  "VVebo-17D-source.zip": {
+    "bytes": 87845,
+    "sha256": "3a15a4afa0f6c01b48cc8bc27aebe841a5f49278f201eb630c6f792139d6d531"
+  },
+  "iPhone17-D-patch-manifest.json": {
+    "bytes": 8668,
+    "sha256": "8ccceb28a1d578ac7ea4e059cceea1dfb58d99a12ca5d894b37063058b9045e7"
+  },
+  "iPhone17-D-说明.txt": {
+    "bytes": 1129,
+    "sha256": "80725158c65fb405f965cf809a8aba510ac5c797b5716ef5ac4528e4680fd22e"
+  }
+}

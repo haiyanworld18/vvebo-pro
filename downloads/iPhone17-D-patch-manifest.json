@@ -1,0 +1,322 @@
+{
+  "baseline": "15A; C caller skips are NOT included",
+  "gate_offset": "0x3400",
+  "gate_size": 192,
+  "gates": {
+    "_VVGatePair": 13312,
+    "_VVGateTriple": 13368,
+    "_VVGateConstructor": 13424
+  },
+  "patches": [
+    {
+      "file_offset": "0x3096b4",
+      "before": "b16f0994",
+      "after": "000080d2",
+      "purpose": "Disabled cloud container: nil"
+    },
+    {
+      "file_offset": "0x309c04",
+      "before": "5d6e0994",
+      "after": "000080d2",
+      "purpose": "Disabled cloud container: nil"
+    },
+    {
+      "file_offset": "0x309d0c",
+      "before": "1b6e0994",
+      "after": "000080d2",
+      "purpose": "Disabled cloud container: nil"
+    },
+    {
+      "file_offset": "0x30a4c0",
+      "before": "2e6c0994",
+      "after": "000080d2",
+      "purpose": "Disabled cloud container: nil"
+    },
+    {
+      "file_offset": "0x30ba70",
+      "before": "c2660994",
+      "after": "000080d2",
+      "purpose": "Disabled cloud container: nil"
+    },
+    {
+      "file_offset": "0x30bd20",
+      "before": "16660994",
+      "after": "000080d2",
+      "purpose": "Disabled cloud container: nil"
+    },
+    {
+      "file_offset": "0x3058d8",
+      "before": "ef7e0994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x306750",
+      "before": "517b0994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x306b50",
+      "before": "517a0994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x307f44",
+      "before": "54750994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x308330",
+      "before": "59740994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x3088cc",
+      "before": "f2720994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x30aa90",
+      "before": "816a0994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x30b57c",
+      "before": "c6670994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x312bcc",
+      "before": "324a0994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x313fdc",
+      "before": "2e450994",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x325ac0",
+      "before": "75fe0894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x328964",
+      "before": "ccf20894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x329428",
+      "before": "1bf00894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x329b80",
+      "before": "45ee0894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x32a21c",
+      "before": "9eec0894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x32a8b8",
+      "before": "f7ea0894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x32af54",
+      "before": "50e90894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x32b5f0",
+      "before": "a9e70894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x32bc8c",
+      "before": "02e60894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x32c330",
+      "before": "59e40894",
+      "after": "000080d2",
+      "purpose": "Disabled operation allocation: nil"
+    },
+    {
+      "file_offset": "0x3060c8",
+      "before": "f9760994",
+      "after": "eaf4f397",
+      "purpose": "Consume owned Swift arrays and return nil operation"
+    },
+    {
+      "file_offset": "0x316564",
+      "before": "d2350994",
+      "after": "c3b3f397",
+      "purpose": "Consume owned Swift arrays and return nil operation"
+    },
+    {
+      "file_offset": "0x32cac0",
+      "before": "7bdc0894",
+      "after": "6c5af397",
+      "purpose": "Consume owned Swift arrays and return nil operation"
+    },
+    {
+      "file_offset": "0x305a88",
+      "before": "bc7e0994",
+      "after": "5ef6f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x3068e0",
+      "before": "267b0994",
+      "after": "c8f2f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x306cd0",
+      "before": "2a7a0994",
+      "after": "ccf1f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x308084",
+      "before": "3d750994",
+      "after": "dfecf397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x308484",
+      "before": "3d740994",
+      "after": "dfebf397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x308a10",
+      "before": "da720994",
+      "after": "7ceaf397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x30ac08",
+      "before": "5c6a0994",
+      "after": "fee1f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x30b704",
+      "before": "9d670994",
+      "after": "3fdff397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x312d50",
+      "before": "0a4a0994",
+      "after": "acc1f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x314158",
+      "before": "08450994",
+      "after": "aabcf397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x3165c0",
+      "before": "ee3b0994",
+      "after": "9eb3f397",
+      "purpose": "Asynchronous ordinary NSError completion, triple"
+    },
+    {
+      "file_offset": "0x325b98",
+      "before": "78fe0894",
+      "after": "2876f397",
+      "purpose": "Asynchronous ordinary NSError completion, triple"
+    },
+    {
+      "file_offset": "0x328b20",
+      "before": "96f20894",
+      "after": "386af397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x3295e0",
+      "before": "e6ef0894",
+      "after": "8867f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x329d3c",
+      "before": "0fee0894",
+      "after": "b165f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32a3d8",
+      "before": "68ec0894",
+      "after": "0a64f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32aa74",
+      "before": "c1ea0894",
+      "after": "6362f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32b110",
+      "before": "1ae90894",
+      "after": "bc60f397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32b7ac",
+      "before": "73e70894",
+      "after": "155ff397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32be48",
+      "before": "cce50894",
+      "after": "6e5df397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32c4e8",
+      "before": "24e40894",
+      "after": "c65bf397",
+      "purpose": "Asynchronous ordinary NSError completion, pair"
+    },
+    {
+      "file_offset": "0x32cb50",
+      "before": "8ae20894",
+      "after": "3a5af397",
+      "purpose": "Asynchronous ordinary NSError completion, triple"
+    }
+  ],
+  "operation_creations_disabled": 23,
+  "completion_setters": 22,
+  "network_object_sha256": "081b1cf6b863493d22ec2fd9ce963f97580727a5214f25caa549df27cd75c934",
+  "ipa_sha256": "7da21e52acf954bfe97cb2493c1461b695fcabb0396be51628a8797a938eacc0"
+}
