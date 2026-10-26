@@ -1,0 +1,33 @@
+{
+  "release": "1.0.3-localpro.1",
+  "app_version": "3.3.31",
+  "build": "4.1803",
+  "display_name": "VVebo 本地Pro",
+  "baseline": "User-confirmed G",
+  "checks": {
+    "exact_three_changed_files": true,
+    "main_diff_exactly_declared_instruction_patches": true,
+    "patched_instruction_count": 6,
+    "all_frameworks_and_ui_assets_identical_to_g": true,
+    "cloud_disable_patches_preserved": true,
+    "display_sdk_declaration_preserved": true,
+    "existing_promotion_opt_in_preserved": true,
+    "app_store_transaction_and_receipt_processing_preserved": true,
+    "local_pro_enabled_in_metadata": true,
+    "original_bundle_id_and_entitlements_preserved": true,
+    "only_bundle_hashes_and_patched_code_pages_refreshed": true,
+    "all_resource_hashes_and_code_pages_valid": true,
+    "test_metadata_removed": true
+  },
+  "device_evidence": "User confirmed E startup/profile functionality and G display; local Pro access, startup UI fix and image-priority candidate require device confirmation; actual FPS has not been measured",
+  "limitations": [
+    "iCloud sync remains disabled",
+    "Apple-trusted re-signing is required",
+    "Image speed and FPS improvements are not established by offline tests",
+    "Local Pro access is separate from App Store purchase restoration and cloud authorization",
+    "Original app source is unavailable; this release maintains compatibility patches"
+  ],
+  "artifact": "VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa",
+  "bytes": 22481450,
+  "sha256": "c0665c2a583ee523c7dad1df11fa7e732adec0e1b32998de8ee244841ca4c270"
+}

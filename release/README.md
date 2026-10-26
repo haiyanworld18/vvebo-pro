@@ -2,7 +2,7 @@
 
 这里包含我们维护的网络补丁源码、精确二进制补丁清单，以及统一后的正式版打包工具。VVebo 原应用没有源码；这里不冒充原应用的完整 Xcode 工程。
 
-当前分支构建 1.0.2-rc.1 图片调度候选版，以用户确认可用的 G 包为固定输入，不重新编译原程序。工具校验底包 SHA256，按白名单应用首次登录界面和图片队列优先级这两处指令替换，并更新版本与签名哈希。正式版 1.0.1 的源码保留在 compat-v1.0.1 标签。
+当前分支构建 1.0.3-localpro.1 本地 Pro 测试版，以用户确认可用的 G 包为固定输入，不重新编译原程序。工具校验底包 SHA256，按白名单应用首次登录界面、图片队列优先级和本地到期状态读取，共 6 处指令替换，并更新版本与签名哈希。正式版 1.0.1 的源码保留在 compat-v1.0.1 标签。
 
 ## 构建正式包
 
@@ -19,7 +19,7 @@ python3 release/build.py downloads/VVebo-3.3.31-iPhone17-Display-G.ipa /tmp/vveb
 独立复核：
 
 ```bash
-python3 release/verify.py downloads/VVebo-3.3.31-iPhone17-Display-G.ipa /tmp/vvebo-release/VVebo-3.3.31-Compat-1.0.2-rc.1.ipa
+python3 release/verify.py downloads/VVebo-3.3.31-iPhone17-Display-G.ipa /tmp/vvebo-release/VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa
 ```
 
 发布校验包括：ZIP 完整性、精确三个变更文件、主程序代码签名前缀除白名单指令外完全相同、全部框架和资源相同、原权限与 Bundle ID 保留、仅两个签名特殊槽及补丁所在代码页哈希更新，以及所有代码页和资源哈希正确。检查使用显式异常，在 `python -O` 下同样生效。
@@ -46,7 +46,19 @@ python3 release/tests/test_image_queue_arm64.py /path/to/G.ipa /path/to/VVebo-3.
 
 该测试执行实际 ARM64 初始化片段、对比 QoS 参数 9/25，并核对不支持 setter 时仍跳过设置，缓存/队列接线、引用收尾和栈保持一致。ObjC 方法使用替身，不测实际延迟、解码速度、耗电或滚动帧率。主程序和嵌入框架中未找到 preferredFramesPerSecond/frameInterval 的显式设置，原 Info.plist 的 CADisableMinimumFrameDurationOnPhone 已为 true；这不足以证明真实运行时没有帧率限制，候选版不宣称已解决高刷体验。
 
-当前候选版保留 App Store 原恢复购买及收据处理代码，不写会员状态。已购用户的恢复表现仍需结合实际错误信息核对。
+该图片调度补丁本身不改变会员判断；本地 Pro 变更另由 local-pro.json 明确记录，不伪装成 App Store 购买恢复。
+
+## 本地 Pro 状态读取
+
+用户将需求从恢复订阅改为解除本地 Pro 功能限制。[local-pro.json](patches/local-pro.json) 在前述两处补丁之外，仅替换 `0x119914`、`0x119918`、`0x11993c`、`0x119940` 四条地址加载指令：把原先的偏好存储接收者/读日期 selector 改为程序已有的 NSDate 类引用和 distantFuture selector。
+
+原 getter `0x119878` 的 Swift Date 元数据、ObjC 桥接、Optional 值见证、ARC 和栈收尾仍执行原代码，不假设一个自造的 Swift Date 内存布局。只改变内存中本地功能判断读到的日期，不新增偏好或收据写入。原状态更新函数 `0x11902c` 会使用该日期得到 isPayed=true、isExpired=false、isForeverPayed=true 及对应本地状态文字。App Store 交易及收据处理主体没有修改，真实购买列表和云容器授权仍是原状态。
+
+```bash
+python3 release/tests/test_local_pro_date_arm64.py /path/to/G.ipa /path/to/VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa
+```
+
+测试执行打包后的原 getter 与状态更新指令，用模型 Foundation 对象、Date 值见证和 Combine setter 检查缺失/过期本地状态均走本地 Pro 分支、栈及寄存器恢复、引用收尾和偏好字节不变。真实 UIKit、Combine、具体 Pro 功能和在线服务行为仍需设备验证。本地启用不等于 App Store 订阅恢复，不改变账号云授权。
 
 ## 网络补丁源码
 

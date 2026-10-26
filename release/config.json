@@ -1,12 +1,13 @@
 {
-  "version": "1.0.2-rc.1",
+  "version": "1.0.3-localpro.1",
   "app_version": "3.3.31",
-  "build": "4.1802",
-  "display_name": "VVebo",
+  "build": "4.1803",
+  "display_name": "VVebo 本地Pro",
   "bundle_id": "com.johnil.vvebo",
   "baseline_file": "VVebo-3.3.31-iPhone17-Display-G.ipa",
   "baseline_sha256": "543f3c816da02bbef4ec6757058381114674e1abc0e3143ed7d87f47f472167c",
   "profile_framework_sha256": "75dfac48fb9bcb6f63b9148d300a2061d4e0424c958059834151f909e3fac0e3",
-  "runtime_patches_file": "patches/ui-and-image-priority.json",
-  "artifact": "VVebo-3.3.31-Compat-1.0.2-rc.1.ipa"
+  "runtime_patches_file": "patches/local-pro.json",
+  "artifact": "VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa",
+  "local_pro_enabled": true
 }

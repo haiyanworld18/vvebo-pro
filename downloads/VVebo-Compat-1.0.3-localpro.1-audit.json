@@ -1,0 +1,22 @@
+{
+  "release": "1.0.3-localpro.1",
+  "scope": "Local Pro feature activation on explicit user request; not purchase or cloud restoration",
+  "checks": {
+    "arm64_date_getter_uses_existing_NSDate_distantFuture": true,
+    "original_Date_bridge_and_Optional_value_witness_flow_preserved": true,
+    "original_state_updater_sets_paid_true_expired_false_forever_true": true,
+    "missing_and_expired_preference_cases_checked": true,
+    "modeled_preferences_not_written": true,
+    "arc_stack_and_callee_saved_registers_preserved": true,
+    "startup_login_route_test_passed": true,
+    "image_queue_initialization_test_passed": true,
+    "app_store_transaction_and_receipt_processing_instructions_unchanged": true,
+    "source_archive_reproduces_identical_candidate": true
+  },
+  "limitations": [
+    "Foundation, Swift witnesses and Combine setters are modeled",
+    "On-device UI and individual Pro features require confirmation",
+    "Cloud and other server-dependent functions remain unavailable",
+    "No actual frame rate or image-speed improvement is measured"
+  ]
+}

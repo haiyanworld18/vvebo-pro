@@ -1,0 +1,58 @@
+{
+  "purpose": "Enable local Pro feature gates on explicit user request; no App Store receipt or cloud authorization change",
+  "baseline": "Pinned user-confirmed G binary",
+  "patches": [
+    {
+      "file_offset": "0x17d3dc",
+      "before": "d3010036",
+      "after": "1f2003d5",
+      "original_instruction": "tbz w19, #0, 0x10017d414",
+      "new_instruction": "nop",
+      "normal_login_fallthrough": "0x17d3e0",
+      "cloud_progress_entry": "0x17c884",
+      "reason": "A false/missing accountRestored preference previously reached the iCloud progress UI; the no-cloud build must use the existing normal login continuation"
+    },
+    {
+      "file_offset": "0x289d0",
+      "before": "22018052",
+      "after": "22038052",
+      "original_instruction": "mov w2, #9",
+      "new_instruction": "mov w2, #25",
+      "reason": "YYWebImageManager shared image queue: NSQualityOfServiceBackground to NSQualityOfServiceUserInitiated; retains respondsToSelector guard, asynchronous queue/cache and original URL/quality behavior"
+    },
+    {
+      "file_offset": "0x119914",
+      "before": "282f00f0",
+      "after": "a82d00d0",
+      "reason": "Load page of existing NSDate class reference"
+    },
+    {
+      "file_offset": "0x119918",
+      "before": "174541f9",
+      "after": "17fd45f9",
+      "reason": "Use NSDate class as receiver instead of stored preference object"
+    },
+    {
+      "file_offset": "0x11993c",
+      "before": "882d00b0",
+      "after": "a82d00b0",
+      "reason": "Load page of existing distantFuture selector"
+    },
+    {
+      "file_offset": "0x119940",
+      "before": "01d142f9",
+      "after": "012146f9",
+      "reason": "Use distantFuture factory; original Swift Date bridge, Optional payload handling and ARC cleanup remain"
+    }
+  ],
+  "local_pro_scope": {
+    "getter": "0x119878",
+    "original_preference_key": "expireDate",
+    "new_receiver": "NSDate",
+    "new_selector": "distantFuture",
+    "changed_instruction_count": 4,
+    "persistence": "None; no preference or receipt write added",
+    "cloud": "Remains disabled",
+    "storekit": "Original transaction and receipt-validation code remains; this is not purchase restoration"
+  }
+}

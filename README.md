@@ -6,6 +6,16 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
+## 本地 Pro 功能测试版 1.0.3-localpro.1
+
+按用户明确要求，解除当前客户端的本地 Pro 到期限制。统一的本地到期状态读取改用系统 NSDate.distantFuture，复用原程序的 Date 转换、Optional 处理及会员状态更新。**这是本地功能启用，不是恢复 App Store 购买或云端授权。**
+
+[下载本地 Pro 测试版](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.3-localpro.1/downloads/VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa) · [说明](downloads/VVebo-Compat-1.0.3-localpro.1-说明.txt) · [源码](downloads/VVebo-Compat-1.0.3-localpro.1-source.zip) · [校验值](downloads/VVebo-Compat-1.0.3-localpro.1-SHA256.json)
+
+用全能签重新签名覆盖安装，桌面名称 **VVebo 本地Pro**，构建号 **4.1803**。无需再点“恢复购买”。保留主页、新机显示、首次云等待界面修复及图片调度候选改动。iCloud 仍关闭；依赖原服务的功能可能仍无法使用。
+
+相对 G，仅增加首次登录、图片队列优先级及本地状态读取这 6 处指令替换，全部依赖库和界面资源不变。ARM64 模型执行确认原状态更新流程得到“已启用、未到期、永久 Pro”，日期桥接、引用收尾及模型偏好数据保持一致；系统与 Combine 方法使用替身，实际会员页面及每项功能待真机确认。未生成或修改 App Store 收据，也未把本地状态写成真实订阅记录。
+
 ## 图片调度候选版 1.0.2-rc.1
 
 用户反馈所有微博列表缩略图偏慢，且已关闭系统低电量模式和限制帧速率。候选版保留 1.0.1 的首次云等待界面修复，将 YYWebImage 共享图片队列的优先级由后台提升为用户发起，保留异步加载、原缓存、URL 和清晰度。**下载速度与流畅度改善尚待真机对比，不能据离线测试称已提速。**
@@ -30,6 +40,12 @@
 - [版本变更](CHANGELOG.md)
 
 已核对：仅将首次登录界面的一条云等待条件分支改为普通登录路径，未写入云恢复成功标记，微博登录验证保留。其余程序指令、加载声明、主页框架、界面资源及原权限与 G 一致；签名只刷新元数据与该代码页哈希。ARM64 片段测试检查首次与已有状态的路由、引用清理及模型数据不变；Foundation/Swift 调用使用替身。这些校验不代替证书信任、完整真机回归或全部在线功能验证。
+
+## 恢复购买调查
+
+用户已确认购买过 Pro 且仍使用原 Apple ID，但当前恢复提示“没有找到购买记录”。原程序在恢复列表为空时会显示这条通用提示，不能据此认定未购买。已有重签文件还存在签名应用标识与 Bundle ID 不匹配的线索；用户已确认原购买类型为 App 内订阅；之后明确将目标改为解除本地功能限制，当前提供独立的本地 Pro 测试版，原 App Store 恢复调查不再作为当前实现目标。
+
+[恢复购买判断与签名核对记录](diagnostics/purchase-restore/README.md)
 
 ## 维护与回退
 

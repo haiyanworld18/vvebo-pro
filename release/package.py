@@ -56,6 +56,8 @@ def release_info(baseline_info, settings):
     info["CFBundleDisplayName"] = settings["display_name"]
     info["CFBundleVersion"] = settings["build"]
     info["VVeboCompatibilityVersion"] = settings["version"]
+    if settings.get("local_pro_enabled"):
+        info["VVeboLocalProEnabled"] = True
     return plistlib.dumps(info, fmt=plistlib.FMT_BINARY, sort_keys=False)
 
 
