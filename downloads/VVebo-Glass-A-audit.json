@@ -1,0 +1,38 @@
+{
+  "release": "1.1.0-glass.1",
+  "baseline": "Exact user-confirmed G; not the failed local Pro candidate",
+  "checks": {
+    "actual_packaged_arm64_adapter_model_passed": true,
+    "pinned_objc_method_ownership_and_encodings_checked": true,
+    "base_bar_inheritance_checked": true,
+    "source_archive_rebuilt_identical_framework_and_ipa": true
+  },
+  "device_verified": false,
+  "limitations": [
+    "UIKit/Foundation/ObjC are modeled in ARM64 execution checks",
+    "Actual rendering, launch/login, signing trust, accessibility transitions and stability require on-device confirmation",
+    "No FPS or performance gain is claimed"
+  ],
+  "import_providers": {
+    "_NSClassFromString": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSBundle": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSProcessInfo": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSThread": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_UIApplication": "/System/Library/Frameworks/UIKit.framework/UIKit",
+    "_UIAccessibilityIsReduceTransparencyEnabled": "/System/Library/Frameworks/UIKit.framework/UIKit",
+    "___CFConstantStringClassReference": "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
+    "__dispatch_main_q": "/usr/lib/libSystem.B.dylib",
+    "_class_getInstanceMethod": "/usr/lib/libobjc.A.dylib",
+    "_class_replaceMethod": "/usr/lib/libobjc.A.dylib",
+    "_dispatch_async_f": "/usr/lib/libSystem.B.dylib",
+    "_method_getImplementation": "/usr/lib/libobjc.A.dylib",
+    "_method_getTypeEncoding": "/usr/lib/libobjc.A.dylib",
+    "_objc_getAssociatedObject": "/usr/lib/libobjc.A.dylib",
+    "_objc_msgSend": "/usr/lib/libobjc.A.dylib",
+    "_objc_release": "/usr/lib/libobjc.A.dylib",
+    "_objc_retain": "/usr/lib/libobjc.A.dylib",
+    "_objc_retainAutoreleasedReturnValue": "/usr/lib/libobjc.A.dylib",
+    "_objc_setAssociatedObject": "/usr/lib/libobjc.A.dylib",
+    "_sel_registerName": "/usr/lib/libobjc.A.dylib"
+  }
+}

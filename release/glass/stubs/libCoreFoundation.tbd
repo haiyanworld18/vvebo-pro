@@ -1,0 +1,10 @@
+--- !tapi-tbd
+tbd-version: 4
+targets: [ arm64-ios ]
+install-name: '/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation'
+current-version: 1
+compatibility-version: 1
+exports:
+  - targets: [ arm64-ios ]
+    symbols: [ '_OBJC_CLASS_$_NSArray', '_OBJC_CLASS_$_NSDictionary', '_OBJC_CLASS_$_NSMutableArray', '_OBJC_CLASS_$_NSMutableData', '_OBJC_CLASS_$_NSMutableDictionary', '___CFConstantStringClassReference' ]
+...

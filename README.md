@@ -6,6 +6,14 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
+## 原生玻璃材质测试 A
+
+用户同意先尝试界面玻璃效果，会员修改停止。该包从 G 原包重新构建，新增独立的玻璃模块，**不包含失败的会员修改**。在 iOS 26 上仅尝试替换已有浮动栏的背景材质，布局、操作和微博内容保留；主程序全部 `__text` 与 G 相同。
+
+[下载玻璃 A 测试包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-a/downloads/VVebo-3.3.31-Glass-A.ipa) · [使用说明](downloads/VVebo-Glass-A-说明.txt) · [实现与检查](release/glass/README.md) · [源码包](downloads/VVebo-Glass-A-source.zip) · [校验值](downloads/VVebo-Glass-A-SHA256.json)
+
+桌面名称 **VVebo 玻璃A**，构建号 **4.1901**。用全能签完整重签后覆盖安装，不先卸载。旧系统保留原效果；开启“降低透明度”时保留/恢复原材质。**真实玻璃显示及稳定性待真机验证，不宣称整套界面已完成适配。** 云同步仍关闭。
+
 ## 本地 Pro 测试版已撤回
 
 用户反馈 1.0.3-localpro.1 安装后再次闪退，该版本停止推荐。离线 ARM64 模型未覆盖这次真机故障，具体崩溃原因尚未确认，不将通过模型测试作为运行安全的依据。
