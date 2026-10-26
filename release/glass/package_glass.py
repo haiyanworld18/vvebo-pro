@@ -120,10 +120,15 @@ def verify(baseline, target):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--reproduce-withdrawn-c', action='store_true',
+                        help='Explicit historical reproduction only: user reported C crashes at launch')
     parser.add_argument('baseline', type=Path)
     parser.add_argument('framework', type=Path)
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
+    if not args.reproduce_withdrawn_c:
+        parser.error('Glass C is withdrawn after a device startup crash; do not distribute it. '
+                     'Use the verified G rollback. Historical reproduction requires --reproduce-withdrawn-c.')
     files, entries = load_baseline(args.baseline, settings())
     framework_info = plistlib.dumps(dict(CFBundleIdentifier=IDENTIFIER, CFBundleName='VVGlass',
         CFBundleExecutable='VVGlass', CFBundlePackageType='FMWK', CFBundleVersion='1',

@@ -6,17 +6,15 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
-## 玻璃 C：系统兼容声明对照版
+## 液态玻璃实验暂停分发
 
-用户确认 B 显示“已执行两次替换”，但界面仍无变化。模块已经执行，不能继续将问题解释为未加载；替换次数也没有证明玻璃渲染成功。
+**C 版已被用户报告启动即闪退，已撤回，不再推荐安装。** A 没有视觉变化；B 虽显示两次背景替换，用户仍看不到变化。因此没有任何玻璃实验版被确认实现可见、稳定的液态玻璃。
 
-[下载玻璃 C 对照包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-c/downloads/VVebo-3.3.31-Glass-C.ipa) · [说明](downloads/VVebo-Glass-C-说明.txt) · [实现与检查](release/glass/README.md) · [源码](downloads/VVebo-Glass-C-source.zip) · [校验值](downloads/VVebo-Glass-C-SHA256.json)
+请完整重新签名并覆盖[用户此前确认可用的 G 原包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/e97e673/downloads/VVebo-3.3.31-iPhone17-Display-G.ipa)，不要先卸载或清除本地数据。G 保留主页和显示修复，不含会员或玻璃实验。
 
-C 只验证新的兼容模式假设：主程序 SDK 兼容声明由 G/B 的 18.0 改为 26.0，并设置 UIDesignRequiresCompatibility=false。没有用 iOS 26 SDK 重编译原 App，也没有证明这两项一定能启用原生玻璃。玻璃模块的 __text 与 B 相同，仅提示标签改为 C；原主程序全部 __text、网络框架及原权限与 G 相同。
+C 的主要行为改动为 SDK 兼容声明由 18.0 -> 26.0，及 UIDesignRequiresCompatibility=false。实验结果不支持继续沿用这组修改；没有本次崩溃栈，不能认定具体终止原因。玻璃构建器默认阻止生成 C，历史源码与文件仅留作审计，不继续分发为可用版本。正式构建配置仍为 1.0.1。
 
-桌面名称 **VVebo 玻璃C**，构建号 **4.1903**。仅针对当前 iOS 26 新机测试，完整重签后覆盖，不先卸载。**新声明可能改变系统控件外观/布局，实际玻璃效果和稳定性未验证**。提示仍会出现，次数只代表替换操作。若仍无效果，不能把本次假设记作已解决，应回到真实视图或兼容状态的诊断。
-
-A：无视觉变化。B：执行两次替换但仍无视觉变化。二者保留在历史标签中，未作为已成功适配的版本。此实验不含会员修改，云同步仍关闭。
+当前 IPA 补丁方案尚未解决原生液态玻璃需求。需要真实 UIKit 渲染/视图或崩溃证据才能有依据地继续修改，离线模型不能代替这些证据。
 
 ## 本地 Pro 测试版已撤回
 
