@@ -118,10 +118,16 @@ def verify(baseline, target):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--reproduce-failed-experiment', action='store_true',
+                        help='Historical research only; D did not produce the requested Liquid Glass effect')
     parser.add_argument('baseline', type=Path)
     parser.add_argument('framework', type=Path)
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
+    if not args.reproduce_failed_experiment:
+        parser.error('Glass experiments did not achieve the requested on-device Liquid Glass effect. '
+                     'Do not distribute as a working adaptation. Historical reproduction requires '
+                     '--reproduce-failed-experiment.')
     files, entries = load_baseline(args.baseline, settings())
     framework_info = plistlib.dumps(dict(CFBundleIdentifier=IDENTIFIER, CFBundleName='VVGlass',
         CFBundleExecutable='VVGlass', CFBundlePackageType='FMWK', CFBundleVersion='1',

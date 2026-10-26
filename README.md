@@ -6,19 +6,17 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
-## 玻璃 D：新建背景与原生材质对照
+## 液态玻璃需求未实现
 
-按用户要求继续实现。D 从正常 G 原包重建，主程序 SDK 声明保持 G 的 18.0，不沿用 C 的主程序 SDK 26 或 UIDesignRequiresCompatibility 修改；C 已被报告启动闪退，保持撤回。
+用户再次确认 D 没有任何效果，并明确要求 iOS 26 液态玻璃的折射、边缘高光及交互形变，不能以普通磨砂或半透明背景替代。
 
-[下载玻璃 D 测试包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-d/downloads/VVebo-3.3.31-Glass-D.ipa) · [使用说明](downloads/VVebo-Glass-D-说明.txt) · [实现与检查](release/glass/README.md) · [源码](downloads/VVebo-Glass-D-source.zip) · [校验值](downloads/VVebo-Glass-D-SHA256.json)
+A 无视觉变化；B 虽提示两次替换仍无变化；C 启动闪退；D 的新背景与样例也没有实现用户所需效果。所有实验均标记未实现，移除可用版安装推荐。历史文件只保留用于审计，默认构建被阻止，不作为完成适配发布。
 
-D 不再给旧 UIVisualEffectView 换效果对象，而是在原按钮和文字后方新建一个以公开 UIGlassEffect clear 材质初始化的视图。原模糊对象保留，只临时隐藏；停用时可恢复。新背景跟随原框的位置、大小更新，不重做前景控件或原主程序指令。
+现有代码只尝试了背景材质，并未重建原有按钮或导航控件的原生玻璃交互；后台 API 对象创建、替换次数、离线模型通过都不能证明真实玻璃渲染或交互成功。C 的启动失败原因也未得到崩溃栈确认。当前离线环境缺乏 iOS 26 UIKit 运行与真机调试能力，不能把未验证的视觉方案交付为完成品。
 
-打开约两秒后会短暂显示“左：原模糊 / 右：原生玻璃”的对照卡片，两侧下面是重复的同样彩色图案，约十二秒后自动移除，不拦截操作。这用于让真机结果区分原控件整合问题与系统玻璃绘制问题；样例文字或新建次数不等于已渲染成功。
+[用户此前确认正常的 G 原包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/e97e673/downloads/VVebo-3.3.31-iPhone17-Display-G.ipa)保留主页和显示修复，可完整重签覆盖回退，不先卸载或清数据。G 不包含玻璃或会员实验。
 
-桌面名称 **VVebo 玻璃D**，构建号 **4.1904**。全能签完整重签后覆盖安装，不先卸载。已完成离线模型、打包与源码复现检查，**实际玻璃效果、可读性及真机稳定性待验证**。无会员补丁，云同步保持关闭。
-
-历史：A 无可见变化；B 提示两次替换仍无变化；C 启动闪退。未将这些结果记为适配成功。出现异常时可完整重签覆盖[用户已确认正常的 G](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/e97e673/downloads/VVebo-3.3.31-iPhone17-Display-G.ipa)。
+继续实现需要针对原控件的运行时视图/渲染证据，重建必要的玻璃控件并在 iOS 26 上实际验证，不能仅靠继续更换模糊参数或 SDK 标签认定成功。
 
 ## 本地 Pro 测试版已撤回
 
