@@ -1,0 +1,15 @@
+{
+  "baseline": "User-confirmed E, unchanged executable code and network/cloud logic",
+  "baseline_sha256": "421cf67f08d72165b06b45d207f4c000b9db155c0ad66b1ba81cc423206ff71f",
+  "launch_screen_change": {
+    "removed": {
+      "UILaunchStoryboardName": "Launch Screen"
+    },
+    "added": {
+      "UILaunchScreen": {}
+    }
+  },
+  "build": "4.1706",
+  "status": "Unverified screen experiment; cause of thin edge bars not confirmed",
+  "sha256": "3c55003cdd2c4be7ad49ccd05f16b7ce11ab15a0e3d48d5e641e215136f86617"
+}
