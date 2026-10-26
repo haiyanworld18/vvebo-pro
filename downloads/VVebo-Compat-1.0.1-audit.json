@@ -1,0 +1,19 @@
+{
+  "release": "1.0.1",
+  "baseline": "G",
+  "native_ui_patch": {
+    "offset": "0x17d3dc",
+    "before": "d3010036",
+    "after": "1f2003d5"
+  },
+  "checks": {
+    "arm64_fresh_login_routes_to_normal_form": true,
+    "original_fresh_login_control_routes_to_cloud_progress": true,
+    "restored_active_account_and_existing_overlay_routes_preserved": true,
+    "key_cleanup_stack_and_modeled_account_preferences_unchanged": true,
+    "rejects_resealed_changes_outside_patch_under_python_O": true,
+    "all_frameworks_and_display_declaration_identical_to_G": true,
+    "source_archive_reproduces_identical_ipa": true
+  },
+  "test_limit": "Foundation and Swift functions are mocked; full UIKit and first-login behavior require device confirmation"
+}

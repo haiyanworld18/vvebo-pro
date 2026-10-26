@@ -1,4 +1,4 @@
-"""Validate and refresh an existing ad-hoc bundle seal without changing code.
+"""Validate and refresh an existing ad-hoc seal for explicitly declared changes.
 
 This does not produce a trusted Apple signature. The user must re-sign the IPA.
 Only the known G baseline is accepted by the release builder.
@@ -79,13 +79,19 @@ def verify_seal(binary, info, resources, identifier):
     return limit, slots
 
 
-def refresh_bundle_hashes(binary, info, resources):
-    """Update only Info.plist and CodeResources hashes in the existing seal."""
-    _, slots = signature_slots(binary)
+def refresh_seal(binary, info, resources, patched_offsets=()):
+    """Refresh bundle hashes and only pages touched by whitelisted patches."""
+    limit, slots = signature_slots(binary)
     start, cd = slots[0]
     hashes = struct.unpack_from(">I", cd, 16)[0]
     output = bytearray(binary)
     for kind, data in ((1, info), (3, resources)):
         position = start + hashes - kind * 32
         output[position:position + 32] = hashlib.sha256(data).digest()
+    for offset in patched_offsets:
+        require(0 <= offset < limit, "Patch offset exceeds signed code")
+    for page in sorted({offset // 4096 for offset in patched_offsets}):
+        position = start + hashes + page * 32
+        output[position:position + 32] = hashlib.sha256(
+            binary[page * 4096:min(limit, (page + 1) * 4096)]).digest()
     return bytes(output)

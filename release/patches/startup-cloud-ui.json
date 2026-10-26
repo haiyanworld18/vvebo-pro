@@ -1,0 +1,16 @@
+{
+  "purpose": "Enter the existing normal login UI when cloud sync is disabled, without setting accountRestored or bypassing Weibo authentication",
+  "baseline": "Pinned user-confirmed G binary",
+  "patches": [
+    {
+      "file_offset": "0x17d3dc",
+      "before": "d3010036",
+      "after": "1f2003d5",
+      "original_instruction": "tbz w19, #0, 0x10017d414",
+      "new_instruction": "nop",
+      "normal_login_fallthrough": "0x17d3e0",
+      "cloud_progress_entry": "0x17c884",
+      "reason": "A false/missing accountRestored preference previously reached the iCloud progress UI; the no-cloud build must use the existing normal login continuation"
+    }
+  ]
+}

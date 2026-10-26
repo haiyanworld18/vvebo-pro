@@ -7,7 +7,7 @@ from pathlib import Path, PurePosixPath
 import plistlib
 import zipfile
 
-from signing import require, verify_seal
+from signing import require, signature_slots, verify_seal
 
 APP = "Payload/VVebo.app/"
 MAIN = APP + "VVebo"
@@ -57,6 +57,26 @@ def release_info(baseline_info, settings):
     info["CFBundleVersion"] = settings["build"]
     info["VVeboCompatibilityVersion"] = settings["version"]
     return plistlib.dumps(info, fmt=plistlib.FMT_BINARY, sort_keys=False)
+
+
+def apply_runtime_patches(binary, settings):
+    """Apply bounded, expected-byte-checked instruction substitutions from G."""
+    path = settings.get("runtime_patches_file")
+    patches = json.loads((Path(__file__).parent / path).read_text())["patches"] if path else []
+    limit, _ = signature_slots(binary)
+    output = bytearray(binary)
+    touched = set()
+    for patch in patches:
+        offset = int(patch["file_offset"], 0)
+        before, after = bytes.fromhex(patch["before"]), bytes.fromhex(patch["after"])
+        require(offset % 4 == 0 and len(before) == len(after) == 4, "Expected one ARM64 instruction")
+        require(0 <= offset and offset + 4 <= limit, "Patch exceeds executable prefix")
+        positions = set(range(offset, offset + 4))
+        require(not touched.intersection(positions), "Overlapping patches")
+        require(binary[offset:offset + 4] == before, "Unexpected original instruction")
+        output[offset:offset + 4] = after
+        touched.update(positions)
+    return bytes(output), tuple(sorted(touched))
 
 
 def release_resources(baseline_resources, info):

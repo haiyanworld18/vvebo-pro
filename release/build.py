@@ -4,9 +4,9 @@ import argparse
 import json
 from pathlib import Path
 
-from package import (MAIN, INFO, RESOURCES, config, load_baseline, release_info,
+from package import (MAIN, INFO, RESOURCES, apply_runtime_patches, config, load_baseline, release_info,
                      release_resources, sha256, write_ipa)
-from signing import refresh_bundle_hashes
+from signing import refresh_seal
 from verify import verify_release
 
 
@@ -19,7 +19,8 @@ def main():
     files, entries = load_baseline(args.baseline, settings)
     files[INFO] = release_info(files[INFO], settings)
     files[RESOURCES] = release_resources(files[RESOURCES], files[INFO])
-    files[MAIN] = refresh_bundle_hashes(files[MAIN], files[INFO], files[RESOURCES])
+    files[MAIN], patched_offsets = apply_runtime_patches(files[MAIN], settings)
+    files[MAIN] = refresh_seal(files[MAIN], files[INFO], files[RESOURCES], patched_offsets)
     args.output.mkdir(parents=True, exist_ok=True)
     target = args.output / settings["artifact"]
     write_ipa(target, files, entries)

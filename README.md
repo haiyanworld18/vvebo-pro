@@ -1,10 +1,10 @@
 # VVebo 兼容维护版
 
-**兼容补丁 1.0.0 · 原应用 3.3.31 · 构建号 4.1800**
+**兼容补丁 1.0.1 · 原应用 3.3.31 · 构建号 4.1801**
 
-以用户已验证的 G 版为基线，修复博主主页微博加载，并保留新机显示兼容处理。用户已确认 E 的启动与主页正常、G 的显示正常。正式包只整理发布信息，运行时代码与 G 相同；本包未单独完成真机回归。
+以用户已验证的 G 版为基线，修复博主主页微博加载，并保留新机显示兼容处理。用户已确认 E 的启动与主页正常、G 的显示正常。1.0.1 修正首次进入仍停在“iCloud 同步中”的界面分支，其余代码与 G 保持一致；本次首次登录界面修复尚待真机确认。
 
-[下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.0/downloads/VVebo-3.3.31-Compat-1.0.0.ipa)
+[下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
 ## 安装
 
@@ -14,19 +14,20 @@
 
 ## 发布文件
 
-- [使用说明](downloads/VVebo-Compat-1.0.0-说明.txt)
-- [源码与构建工具](downloads/VVebo-Compat-1.0.0-source.zip)
-- [SHA256 校验值](downloads/VVebo-Compat-1.0.0-SHA256.json)
-- [精确差异与签名哈希校验结果](downloads/VVebo-Compat-1.0.0-verification.json)
-- [构建复现与源码核对结果](downloads/VVebo-Compat-1.0.0-audit.json)
+- [使用说明](downloads/VVebo-Compat-1.0.1-说明.txt)
+- [源码与构建工具](downloads/VVebo-Compat-1.0.1-source.zip)
+- [SHA256 校验值](downloads/VVebo-Compat-1.0.1-SHA256.json)
+- [精确差异与签名哈希校验结果](downloads/VVebo-Compat-1.0.1-verification.json)
+- [构建复现与源码核对结果](downloads/VVebo-Compat-1.0.1-audit.json)
 - [版本变更](CHANGELOG.md)
 
-已核对：全部程序指令、加载声明、主页框架、界面资源及原权限与 G 一致；仅更新应用名称、构建号、补丁版本、测试标记和对应签名哈希。重复构建字节一致，主页框架源码可重建为 G 中的同一二进制。这些校验不代替证书信任、完整真机回归或全部在线功能验证。
+已核对：仅将首次登录界面的一条云等待条件分支改为普通登录路径，未写入云恢复成功标记，微博登录验证保留。其余程序指令、加载声明、主页框架、界面资源及原权限与 G 一致；签名只刷新元数据与该代码页哈希。ARM64 片段测试检查首次与已有状态的路由、引用清理及模型数据不变；Foundation/Swift 调用使用替身。这些校验不代替证书信任、完整真机回归或全部在线功能验证。
 
 ## 维护与回退
 
-[维护源码和构建方法](release/README.md)涵盖我们新增的补丁与打包工具；VVebo 原应用没有源码，本仓库不是其完整 Xcode 工程。发布标签为 `compat-v1.0.0`。
+[维护源码和构建方法](release/README.md)涵盖我们新增的补丁与打包工具；VVebo 原应用没有源码，本仓库不是其完整 Xcode 工程。发布标签为 `compat-v1.0.1`。
 
+- [1.0.0 原包备份](downloads/VVebo-3.3.31-Compat-1.0.0.ipa)：保留此前版本，其中首次进入云等待页的问题在 1.0.1 修正。
 - [G 原包备份](downloads/VVebo-3.3.31-iPhone17-Display-G.ipa)：用户已确认显示正常，可重新签名覆盖回退。
 - [15A 旧机基线](downloads/VVebo-3.3.31-iOS15-Profile-A.ipa)：用户确认在 iPhone 13 Pro Max / iOS 15 / TrollStore 可使用。
 - [历史版本记录](HISTORY.md) · [云同步授权说明](downloads/iCloud-恢复可行性-说明.txt)

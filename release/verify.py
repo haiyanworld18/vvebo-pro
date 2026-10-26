@@ -1,4 +1,4 @@
-"""Verify release identity and exact equivalence of runtime bytes to G."""
+"""Verify release identity and exact declared changes from G."""
 
 import argparse
 import hashlib
@@ -6,9 +6,9 @@ import plistlib
 import struct
 from pathlib import Path
 
-from package import (APP, MAIN, INFO, RESOURCES, TEST_KEYS, config, load_baseline,
+from package import (APP, MAIN, INFO, RESOURCES, TEST_KEYS, apply_runtime_patches, config, load_baseline,
                      read_ipa, release_info, release_resources)
-from signing import commands, refresh_bundle_hashes, require, verify_seal
+from signing import commands, refresh_seal, require, verify_seal
 
 
 def verify_release(baseline, target):
@@ -27,10 +27,11 @@ def verify_release(baseline, target):
             "Unplanned resource seal changes")
     old_limit, _ = verify_seal(old[MAIN], old[INFO], old[RESOURCES], settings["bundle_id"])
     limit, _ = verify_seal(files[MAIN], files[INFO], files[RESOURCES], settings["bundle_id"])
-    require(limit == old_limit and files[MAIN][:limit] == old[MAIN][:limit],
-            "Executable instructions or load commands differ from G")
-    require(files[MAIN] == refresh_bundle_hashes(old[MAIN], files[INFO], files[RESOURCES]),
-            "Signature changed beyond the two bundle metadata hashes")
+    expected_main, patched_offsets = apply_runtime_patches(old[MAIN], settings)
+    require(limit == old_limit and files[MAIN][:limit] == expected_main[:limit],
+            "Executable differs beyond the declared instruction patches")
+    require(files[MAIN] == refresh_seal(expected_main, files[INFO], files[RESOURCES], patched_offsets),
+            "Signature changed beyond bundle hashes and declared code pages")
     for name, value in plistlib.loads(files[RESOURCES])["files"].items():
         if APP + name in files:
             expected = value["hash"] if isinstance(value, dict) else value
@@ -44,15 +45,16 @@ def verify_release(baseline, target):
             "build": settings["build"], "display_name": settings["display_name"],
             "baseline": "User-confirmed G", "checks": {
                 "exact_three_changed_files": True,
-                "main_code_and_load_commands_identical_to_g": True,
+                "main_diff_exactly_declared_instruction_patches": True,
+                "patched_instruction_count": len(patched_offsets) // 4,
                 "all_frameworks_and_ui_assets_identical_to_g": True,
                 "cloud_disable_patches_preserved": True,
                 "display_sdk_declaration_preserved": True,
                 "original_bundle_id_and_entitlements_preserved": True,
-                "only_two_code_directory_hashes_refreshed": True,
+                "only_bundle_hashes_and_patched_code_pages_refreshed": True,
                 "all_resource_hashes_and_code_pages_valid": True,
                 "test_metadata_removed": True},
-            "device_evidence": "User confirmed E startup/profile functionality and G display; release package itself not independently device-tested",
+            "device_evidence": "User confirmed E startup/profile functionality and G display; first-login cloud progress UI fix still requires device confirmation",
             "limitations": ["iCloud sync remains disabled", "Apple-trusted re-signing is required",
                             "Original app source is unavailable; this release maintains compatibility patches"]}
 
