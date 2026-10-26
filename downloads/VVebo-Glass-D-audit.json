@@ -1,0 +1,25 @@
+{
+  "release": "1.1.0-glass.4",
+  "device_feedback": {
+    "a": "No visual change",
+    "b": "Two replacements shown but no visual change",
+    "c": "Crashes at launch"
+  },
+  "approach": "Fresh UIVisualEffectView initialized with public clear UIGlassEffect; temporary native blur/glass comparison over identical repeated color patterns",
+  "checks": {
+    "source_archive_reproduces_identical_framework_and_ipa": true,
+    "arm64_surface_stacking_geometry_reuse_and_restoration_model_passed": true,
+    "old_effect_object_not_mutated_in_model": true,
+    "comparison_background_patterns_identical": true,
+    "card_and_status_cleanup_model_passed": true,
+    "main_sdk18_preserved": true,
+    "c_compatibility_flag_absent": true
+  },
+  "device_verified": false,
+  "limitations": [
+    "Foundation/UIKit/ObjC runtime are modeled",
+    "New surface creation and comparison labels do not prove actual native rendering",
+    "Real visual quality, readability, lifecycle and signing stability require device confirmation",
+    "Only the new Objective-C module declares SDK 26; original main remains G SDK 18"
+  ]
+}

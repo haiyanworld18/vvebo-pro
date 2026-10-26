@@ -1,53 +1,34 @@
-# C 已撤回：启动闪退
+# 玻璃 D：新建原生背景与可见对照
 
-用户报告 C 打开即闪退。A 无视觉变化，B 执行两次替换仍无视觉变化，均未验证玻璃显示成功。停止推荐玻璃包，先覆盖回退至已验证 G。
+产物 `VVebo-3.3.31-Glass-D.ipa`，桌面名称 **VVebo 玻璃D**，构建号 **4.1904**，固定用户确认可用的 G 为底包。用户要求在 A/B 无视觉变化、C 启动闪退后继续实现。C 保持撤回，其 SDK 声明方案不沿用。
 
-主程序 SDK 26 声明及 UIDesignRequiresCompatibility=false 的对照实验未通过真机启动；尚无崩溃栈确定实际终止点，不能宣称仅凭差异已查明原因。当前脚本默认拒绝生成 C。下文历史构建命令要追加 `--reproduce-withdrawn-c` 才能进行审计复现，不应用来重新分发给用户试装。
+## 新方案
 
-原包、标签与校验结果保留用于追踪。离线检查通过不能抵消真机失败，未提供新玻璃候选版。正式构建配置未改动。
+A/B 在旧 UIVisualEffectView 上设置 UIGlassEffect；B 已在真机显示两次替换，但没有可见变化。D 测试不同的整合方式：直接以公开 UIGlassEffect clear 材质初始化一个新的 UIVisualEffectView，而非给旧实例更换 effect。
 
----
+原 BlurView 位于 BaseBarView 内且不在嵌套 BlurButton 下时，找到其原 UIBlurEffect 视图，在同一容器的 index 0 插入新玻璃视图。复制原 frame、使用 G 的 flexible width/height mask，且每次原布局回调之后重新对齐；启用公开 capsuleConfiguration。原按钮、文字和触摸处理不改动。
 
-# 玻璃实验 C：系统兼容声明对照
+原模糊视图的 effect 对象完全保留，保存其原 hidden 状态后隐藏。新视图通过关联对象复用，不在每次布局重复创建；其父视图由 UIKit 管理。系统降低透明度或离开目标范围时，移除新视图并还原旧视图的可见状态。原底色板沿用 B 的有界、结构识别方式暂时隐藏及恢复，不读取 Swift ivar 或偏好。
 
-当前产物 `VVebo-3.3.31-Glass-C.ipa`，桌面名称 **VVebo 玻璃C**，构建号 **4.1903**，以固定 G 底包构建。不含会员、图片队列或首次云等待分支的补丁。
+玻璃视图不接收触摸，因此本版不声称实现系统按钮的交互形变。clear 材质可能影响复杂背景上的前景可读性，仍需实机观察；它不是完整的全 App 界面重构。
 
-用户报告 B 已显示两次背景替换，但无视觉变化。因此不能认定 B 已完成原生玻璃适配，也不能再把该现象归因于未加载模块。
+## 真机视觉对照
 
-C 的待验证假设是旧 SDK 声明导致 UIKit 保持旧应用兼容行为。具体仅改变主程序 LC_BUILD_VERSION 的 SDK 字段 18.0 -> 26.0，并设置公开的 UIDesignRequiresCompatibility=false；最低版本不变。原 DTSDK 构建元数据保留，**这不是用 SDK 26 重新编译，也不保证触发所需显示行为**。当前没有真机 UIKit 内部状态证明假设成立。
+主队列安装后约两秒，在原窗口上显示一次对照卡。八个色块构成重复图案，左右各四个完全相同；左侧新建 UIBlurEffect 对照，右侧新建 UIGlassEffect clear。两侧效果视图均使用同样的 frame 尺寸和胶囊形状。卡片及状态标签约十二秒后移除，不拦截触摸，不使用持续轮询或帧循环。
 
-玻璃适配模块的全部 __text 与 B 相同，只将状态标签 B 改成 C。原主程序所有 __text 也与 G 相同。新 SDK 声明可能改变系统控件外观或布局，针对当前 iOS 26 设备单独测试，不承诺旧系统行为完全不受影响。构建/校验命令在下文；B 的材质处理逻辑与其模型限制仍适用于 C。
+这提供的是待检查样例，文字“原生玻璃”及“已新建 N 处”不证明系统成功渲染。应观察样例与真实底栏，并反馈是否有视觉差异；只有样例变、底栏不变时，需进一步诊断原栏整合。模型无法替用户判断这个结果。
 
-以下为 B 的实现依据与沿用范围，不是已解决的声明。
+## 保持 G 主程序行为
 
-## A 的反馈与 B 的依据
+- 主程序 LC_BUILD_VERSION 的 SDK 保持 18.0、最低版本保持 14.0，所有 __text 与 G 一致。
+- 不写入 C 的 UIDesignRequiresCompatibility=false，不改原 DTSDK 构建元数据。
+- 所有原框架、资源和原权限与 G 一致；增加 VVGlass 框架及弱加载声明、更新元数据/签名。
+- 仅新增、无 Swift 代码的适配框架声明 SDK 26、最低 iOS 14。新系统类使用运行时查找，iOS 26 以下不创建玻璃。原 App 没有使用 SDK 26 重新编译。
+- 不含会员、图片调度或首次云等待分支的实验补丁；云同步保持关闭。
 
-用户报告 A 版没有玻璃视觉变化，未报告这次发生崩溃。不能据此断定 A 模块已经加载或成功替换材质。
+## 构建与校验
 
-在固定 G 程序中检查到：
-
-- BlurView 的 ObjC ivar 名称包括 `blurView`、`containerView` 和 `$__lazy_storage_$_colorView`。这些名称仅用于静态调查，适配代码不通过 ivar 或 Swift 内存布局读写视图。
-- `0x37ce54` 把 containerView 加入 BlurView，`0x37cf24` 把效果视图加入容器；`0x37d034` 在同一容器中再添加独立 colorView。后者无交互，其创建函数 `0x37cb4c` 返回一个普通 UIView。
-- colorView 的动态配色经 `0x1c752c -> 0x1cad80`，常用分支调用 colorWithAlphaComponent，常数 `0x596c60` 为 0.8。A 只替换材质，保留了这层覆盖色。因此底色遮挡是一个有静态证据的待验证原因，而非已证实的唯一原因。
-
-## B 的范围与行为
-
-- iOS 26 动态查找公开 `UIGlassEffect`，调用 `effectWithStyle:0`（regular）。只在原 BlurView 位于 BaseBarView 内时处理其原有 UIBlurEffect；不进入嵌套 BlurButton，也不替换 vibrancy 或屏幕外的无关背景。
-- 原始 `layoutSubviews` 与 `updateAppStyle:` 总是先按保存的原 IMP 调用，之后适配。保持其原接收者、selector 和通知参数。只修改已有背景效果，不改变原尺寸、手势或控制器。
-- 每个容器存在本模块创建的玻璃时，只隐藏同容器内精确为 UIView、无交互、无子视图且有背景色的底色板。不会隐藏带内容的 UIView、UILabel、按钮或整个页面背景。保存原 hidden 状态；停用时恢复，不强制所有视图显示。
-- 在公开 API 存在时，为效果视图设置 `UICornerConfiguration.capsuleConfiguration`，让玻璃知道其胶囊形状。保存原圆角配置；恢复材质时一起还原。不修改旧 SDK 的布局声明来强行切换全应用样式。
-- 已经是本模块的玻璃时不重复创建。系统“降低透明度”开启时保留/恢复原模糊和底色；设置变化在后续布局、主题回调或重开 App 时体现。
-- iOS 26 以下、目标类/API 不存在、Bundle ID 不符时不安装。原程序 __text、网络框架、原权限和资源与 G 一致，只有头部新增框架弱加载声明及新框架/签名。
-
-### 测试状态提示
-
-构造函数只排一次主线程安装。B 每次启动约两秒后再做一次有界窗口检查，显示一个五秒后移除的无交互 UILabel，不新增持续轮询或帧循环。
-
-可能提示“玻璃 B：已执行 N 次背景替换”、系统降低透明度、应用标识变更、接口/目标栏未找到等。N 是替换操作次数，不是唯一控件数，更不代表 UIKit 已渲染成功。C 将提示中的版本标签改为 C；该提示用于真机诊断；没有提示也可能是模块未加载或当时无可用窗口，不能直接判定渲染器问题。
-
-## 构建与检查
-
-需要 Zig 0.13.0、ld64.lld 19.1.7、Python 3；ARM64 模型测试另需 unicorn。所有头文件仅声明公开系统 API，链接 stub 记录实际提供方。
+Zig 0.13.0、ld64.lld 19.1.7、Python 3；执行 ARM64 模型另需 unicorn。头文件仅声明公开 API，链接 stub 明确系统提供方。
 
 ```bash
 ZIG_BIN=/path/to/zig LD64_LLD_BIN=/path/to/ld64.lld bash release/glass/build.sh
@@ -55,14 +36,14 @@ python3 release/glass/package_glass.py /path/to/G.ipa /tmp/vvebo-glass-native/VV
 PYTHONPATH=/path/to/unicorn python3 release/glass/test_native.py /tmp/vvebo-glass-native/VVGlass
 ```
 
-固定 G 的 SHA256：`543f3c816da02bbef4ec6757058381114674e1abc0e3143ed7d87f47f472167c`。
+固定 G SHA256：`543f3c816da02bbef4ec6757058381114674e1abc0e3143ed7d87f47f472167c`。
 
-模型执行编译产物的实际 ARM64，检查：门禁、目标范围、嵌套容器、按钮/vibrancy 排除、底色板识别与可逆处理、透明度回退、胶囊配置、重复布局复用、原方法参数/次序、栈和寄存器；另检查状态提示的 CGRect ABI、文字参数、无交互属性和移除。打包校验核对整个原 __text 相同、原框架相同、原权限相同、代码/资源及嵌套框架 cdhash。
+模型运行编译产物的实际 ARM64，替身实现 ObjC/UIKit/Foundation。检查新视图创建、index 0 插入、frame ABI 与后续更新、旧对象不修改、重复布局复用、类型/范围排除、透明度回退、底色恢复、原回调参数/顺序、栈/寄存器，以及两种材质对照卡和定时清理。打包检查原程序 __text、原框架、SDK/权限、代码和资源哈希；源码包可重建相同框架与 IPA。
 
-UIKit、Foundation、ObjC runtime 在模型中由替身实现。这些检查不证明真实玻璃观感、完整生命周期、签名信任或真机稳定；不宣称性能或帧率改善。A 无视觉变化和会员实验闪退都说明，离线通过不能替代真机结果。
+这些检查不证明真实 UIKit 的渲染、生命周期、签名信任或稳定性；不宣称帧率、加载速度改善。A/B 无可见效果、C 启动闪退均完整保留为历史反馈，没有因模型通过而覆盖这些事实。
 
-## 安装与回退
+## 使用
 
-全能签完整重签，包括新增框架，覆盖安装；不先卸载或清数据。此包不新增会员或云授权，云同步仍关闭。异常时可完整重签并覆盖 G 原包回退。
+全能签完整重签（含新增框架）后覆盖安装，不先卸载或清数据。异常时完整重签并覆盖已验证 G。
 
-API 依据：iOS 26 SDK 镜像的 [UIGlassEffect.h](https://raw.githubusercontent.com/xybp888/iOS-SDKs/master/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIGlassEffect.h) 与 [UICornerConfiguration.h](https://raw.githubusercontent.com/xybp888/iOS-SDKs/master/iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UICornerConfiguration.h)，2026-10-26 核对。只使用公开材质和胶囊配置，不使用私有滤镜或伪造折射。
+API 核对来自 iOS 26 SDK 镜像的 UIGlassEffect.h 与 UICornerConfiguration.h：effectWithStyle 的 regular=0、clear=1；UICornerConfiguration 提供 capsuleConfiguration。采用公开 API，不使用私有玻璃滤镜或自绘边框冒充原生玻璃。

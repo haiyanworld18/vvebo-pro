@@ -2,16 +2,17 @@
 
 // Confined to the app's existing BlurView underneath BaseBarView. No Swift
 // metadata, raw ivars, original geometry, touch handlers or paid state.
-// B adds a temporary, non-interactive status label for this test only.
+// D adds a temporary status label and native material comparison card.
 static Class glassClass, blurClass, effectViewClass, blurViewClass, barClass;
 static Class plainViewClass, cornerClass, blurButtonClass;
 static IMP originalLayout, originalStyle;
 static BOOL installed;
-static char priorEffectKey;
-static char priorHiddenKey, priorCornerKey;
+static char freshSurfaceKey;
+static char priorHiddenKey, priorEffectHiddenKey;
 static NSUInteger replacementCount;
 static NSString *statusReason = @"适配尚未执行";
 static UILabel *statusLabel;
+static UIView *comparisonCard;
 
 static BOOL IsBarBackground(UIView *view) {
     UIView *ancestor = view.superview;
@@ -45,6 +46,8 @@ static void UpdateColorPlates(UIView *container, BOOL glassPresent) {
     }
 }
 
+// Build a fresh UIVisualEffectView with UIGlassEffect at initialization. The
+// old effect object is never changed; its original visibility is reversible.
 static void UpdateEffectChildren(UIView *view, BOOL enabled, unsigned depth, unsigned *budget) {
     NSArray *children = view.subviews;
     NSUInteger count = children.count;
@@ -53,40 +56,41 @@ static void UpdateEffectChildren(UIView *view, BOOL enabled, unsigned depth, uns
         --*budget;
         id child = [children objectAtIndex:index];
         if (![child isKindOfClass:effectViewClass]) {
-            // G's effect view is inside a plain UIView owned by BlurView.
-            // Do not enter another BlurView or UIKit's internal effect subviews.
             if (depth < 2 && ![child isKindOfClass:blurViewClass])
                 UpdateEffectChildren(child, enabled, depth + 1, budget);
             continue;
         }
-        UIVisualEffectView *effectView = child;
-        id current = effectView.effect;
+        UIVisualEffectView *oldView = child;
+        if (![oldView.effect isKindOfClass:blurClass]) continue;
+        UIVisualEffectView *newView = objc_getAssociatedObject(oldView, &freshSurfaceKey);
         if (!enabled) {
-            id prior = objc_getAssociatedObject(effectView, &priorEffectKey);
-            if ([current isKindOfClass:glassClass] && prior) {
-                effectView.effect = prior;
-                if ([effectView respondsToSelector:sel_registerName("setCornerConfiguration:")])
-                    effectView.cornerConfiguration = objc_getAssociatedObject(effectView, &priorCornerKey);
+            if (newView) {
+                [newView removeFromSuperview];
+                id prior = objc_getAssociatedObject(oldView, &priorEffectHiddenKey);
+                if (prior) oldView.hidden = [prior boolValue];
+                objc_setAssociatedObject(oldView, &freshSurfaceKey, nil, 1);
+                objc_setAssociatedObject(oldView, &priorEffectHiddenKey, nil, 1);
             }
-            objc_setAssociatedObject(effectView, &priorEffectKey, nil, 1);
-            objc_setAssociatedObject(effectView, &priorCornerKey, nil, 1);
             continue;
         }
-        if ([current isKindOfClass:glassClass] && objc_getAssociatedObject(effectView, &priorEffectKey)) {
-            glassPresent = YES;
-            continue;
+        if (!newView) {
+            id glass = [glassClass effectWithStyle:1]; // public clear glass style
+            if (!glass || ![glass isKindOfClass:glassClass]) continue;
+            newView = [[effectViewClass alloc] initWithEffect:glass];
+            if (!newView) continue;
+            newView.userInteractionEnabled = NO;
+            newView.autoresizingMask = 18; // flexible width + height, as in G
+            if (cornerClass && [newView respondsToSelector:sel_registerName("setCornerConfiguration:")])
+                newView.cornerConfiguration = [cornerClass capsuleConfiguration];
+            objc_setAssociatedObject(oldView, &priorEffectHiddenKey,
+                                     [NSNumber numberWithBool:oldView.isHidden], 1);
+            objc_setAssociatedObject(oldView, &freshSurfaceKey, newView, 1);
+            newView.frame = oldView.frame;
+            [view insertSubview:newView atIndex:0];
+            replacementCount++;
         }
-        if (![current isKindOfClass:blurClass]) continue;
-        id glass = [glassClass effectWithStyle:0]; // UIGlassEffectStyleRegular
-        if (!glass || ![glass isKindOfClass:glassClass]) continue;
-        if (!objc_getAssociatedObject(effectView, &priorEffectKey) && cornerClass &&
-            [effectView respondsToSelector:sel_registerName("cornerConfiguration")])
-            objc_setAssociatedObject(effectView, &priorCornerKey, effectView.cornerConfiguration, 1);
-        objc_setAssociatedObject(effectView, &priorEffectKey, current, 1);
-        effectView.effect = glass;
-        if (cornerClass && [effectView respondsToSelector:sel_registerName("setCornerConfiguration:")])
-            effectView.cornerConfiguration = [cornerClass capsuleConfiguration];
-        replacementCount++;
+        newView.frame = oldView.frame;
+        oldView.hidden = YES;
         glassPresent = YES;
     }
     UpdateColorPlates(view, glassPresent);
@@ -174,6 +178,54 @@ static void HideStatus(void *context) {
     (void)context;
     [statusLabel removeFromSuperview];
     statusLabel = nil;
+    [comparisonCard removeFromSuperview];
+    comparisonCard = nil;
+}
+
+static UILabel *MakeLabel(CGRect frame, NSString *text) {
+    UILabel *label = [[NSClassFromString(@"UILabel") alloc] initWithFrame:frame];
+    label.text = text;
+    label.numberOfLines = 2;
+    label.textAlignment = 1;
+    label.userInteractionEnabled = NO;
+    label.textColor = [NSClassFromString(@"UIColor") labelColor];
+    return label;
+}
+
+// Native effects over the same synthetic colored backdrop. This temporary
+// card is a visual control; drawing the card does not prove native rendering.
+static void ShowComparison(UIView *window) {
+    if (!installed || UIAccessibilityIsReduceTransparencyEnabled()) return;
+    CGFloat width = window.bounds.size.width - 32;
+    if (width < 200) return;
+    comparisonCard = [[plainViewClass alloc] initWithFrame:(CGRect){{16, 174}, {width, 158}}];
+    comparisonCard.userInteractionEnabled = NO;
+    comparisonCard.backgroundColor = [NSClassFromString(@"UIColor") secondarySystemBackgroundColor];
+    [comparisonCard addSubview:MakeLabel((CGRect){{0, 0}, {width, 30}}, @"左：原模糊    右：原生玻璃")];
+    const double colors[4][3] = {{0.12, 0.40, 0.95}, {0.95, 0.30, 0.24},
+                                  {0.20, 0.75, 0.40}, {0.95, 0.65, 0.15}};
+    for (unsigned index = 0; index < 8; index++) {
+        UIView *stripe = [[plainViewClass alloc] initWithFrame:
+            (CGRect){{width * index / 8, 30}, {width / 8, 128}}];
+        stripe.userInteractionEnabled = NO;
+        stripe.backgroundColor = [NSClassFromString(@"UIColor") colorWithRed:colors[index % 4][0]
+            green:colors[index % 4][1] blue:colors[index % 4][2] alpha:1];
+        [stripe addSubview:MakeLabel((CGRect){{0, 0}, {width / 8, 128}}, @"ABC\n123")];
+        [comparisonCard addSubview:stripe];
+    }
+    for (unsigned index = 0; index < 2; index++) {
+        id effect = index ? [glassClass effectWithStyle:1] : [blurClass effectWithStyle:1];
+        if (!effect) continue;
+        UIVisualEffectView *surface = [[effectViewClass alloc] initWithEffect:effect];
+        surface.frame = (CGRect){{8 + index * width / 2, 56}, {width / 2 - 16, 76}};
+        surface.userInteractionEnabled = NO;
+        if (cornerClass && [surface respondsToSelector:sel_registerName("setCornerConfiguration:")])
+            surface.cornerConfiguration = [cornerClass capsuleConfiguration];
+        [surface.contentView addSubview:MakeLabel((CGRect){{0, 0}, {width / 2 - 16, 76}},
+                                                 index ? @"原生玻璃" : @"原模糊")];
+        [comparisonCard addSubview:surface];
+    }
+    [window addSubview:comparisonCard];
 }
 
 static void ShowStatus(void *context) {
@@ -189,9 +241,9 @@ static void ShowStatus(void *context) {
     }
     if (!window) return;
     NSString *message;
-    if (UIAccessibilityIsReduceTransparencyEnabled()) message = @"玻璃 C：系统开启了降低透明度";
-    else if (replacementCount) message = [NSString stringWithFormat:@"玻璃 C：已执行 %lu 次背景替换", replacementCount];
-    else message = [NSString stringWithFormat:@"玻璃 C：%@", statusReason];
+    if (UIAccessibilityIsReduceTransparencyEnabled()) message = @"玻璃 D：系统开启了降低透明度";
+    else if (replacementCount) message = [NSString stringWithFormat:@"玻璃 D：已新建 %lu 处玻璃背景", replacementCount];
+    else message = [NSString stringWithFormat:@"玻璃 D：%@", statusReason];
     CGRect bounds = window.bounds;
     if (bounds.size.width < 100) return;
     statusLabel = [[NSClassFromString(@"UILabel") alloc] initWithFrame:
@@ -203,7 +255,8 @@ static void ShowStatus(void *context) {
     statusLabel.backgroundColor = [NSClassFromString(@"UIColor") secondarySystemBackgroundColor];
     statusLabel.textColor = [NSClassFromString(@"UIColor") labelColor];
     [window addSubview:statusLabel];
-    dispatch_after_f(dispatch_time(0, 5000000000LL), &_dispatch_main_q, (void *)0, HideStatus);
+    ShowComparison(window);
+    dispatch_after_f(dispatch_time(0, 12000000000LL), &_dispatch_main_q, (void *)0, HideStatus);
 }
 
 static void InstallAndReport(void *context) {

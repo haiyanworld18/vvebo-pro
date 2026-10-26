@@ -16,8 +16,8 @@ from package import APP, MAIN, INFO, RESOURCES, load_baseline, release_info, sha
 from signing import commands, refresh_seal, require, signature_slots, verify_seal
 from macho_support import sign
 
-VERSION = '1.1.0-glass.3'
-NAME = 'VVebo-3.3.31-Glass-C.ipa'
+VERSION = '1.1.0-glass.4'
+NAME = 'VVebo-3.3.31-Glass-D.ipa'
 IDENTIFIER = 'com.vvebo.compat.VVGlass'
 REL = 'Frameworks/VVGlass.framework/'
 PATH = APP + REL
@@ -27,7 +27,7 @@ LOAD_PATH = '@executable_path/Frameworks/VVGlass.framework/VVGlass'
 
 
 def settings():
-    return dict(version=VERSION, build='4.1903', display_name='VVebo 玻璃C',
+    return dict(version=VERSION, build='4.1904', display_name='VVebo 玻璃D',
                 bundle_id='com.johnil.vvebo', app_version='3.3.31',
                 baseline_sha256=BASELINE, profile_framework_sha256=PROFILE)
 
@@ -52,14 +52,7 @@ def command(binary):
     result = bytearray(binary)
     struct.pack_into('<II', result, 16, old_count + 1, old_size + length)
     result[end:end + length] = load
-    version_commands = [p for p, kind, _ in commands(binary) if kind == 0x32]
-    require(len(version_commands) == 1, 'Expected one original build-version command')
-    version = version_commands[0]
-    require(struct.unpack_from('<III', binary, version + 8) == (2, 0xE0000, 0x120000),
-            'Unexpected G platform/minimum/SDK declaration')
-    struct.pack_into('<I', result, version + 16, 0x1A0000)
-    return (bytes(result), tuple(range(16, 24)) + tuple(range(end, end + length)) +
-            tuple(range(version + 16, version + 20)))
+    return bytes(result), tuple(range(16, 24)) + tuple(range(end, end + length))
 
 
 def verify(baseline, target):
@@ -74,8 +67,7 @@ def verify(baseline, target):
             'Unplanned baseline changes')
     info = plistlib.loads(files[INFO])
     expected_info = plistlib.loads(release_info(original[INFO], settings()))
-    expected_info['VVeboGlassExperiment'] = 'sdk26-declaration-comparison-c'
-    expected_info['UIDesignRequiresCompatibility'] = False
+    expected_info['VVeboGlassExperiment'] = 'fresh-native-backgrounds-d'
     require(info == expected_info, 'Unplanned Info settings')
     require(not info.get('VVeboLocalProEnabled'), 'Paid flag must not be present')
     expected, offsets = command(original[MAIN])
@@ -96,6 +88,11 @@ def verify(baseline, target):
             {k: v[1] for k, v in old_slots.items() if k in (5, 7)}, 'Entitlements changed')
     _, glass_slots = verify_seal(files[PATH + 'VVGlass'], files[PATH + 'Info.plist'],
                        files[PATH + '_CodeSignature/CodeResources'], IDENTIFIER)
+    for executable, sdk, label in ((files[MAIN], 0x120000, 'G main'),
+                                   (files[PATH + 'VVGlass'], 0x1A0000, 'new glass module')):
+        versions = [p for p, kind, _ in commands(executable) if kind == 0x32]
+        require(len(versions) == 1 and struct.unpack_from('<III', executable, versions[0] + 8)
+                == (2, 0xE0000, sdk), 'Unexpected SDK/minimum declaration: ' + label)
     cdhash = hashlib.sha256(glass_slots[0][1]).digest()[:20]
     resources = plistlib.loads(files[RESOURCES])
     for rel, seal in resources['files'].items():
@@ -107,28 +104,24 @@ def verify(baseline, target):
             'Homepage framework changed')
     return dict(version=VERSION, artifact=NAME, build=info['CFBundleVersion'],
                 bytes=Path(target).stat().st_size, sha256=sha256(Path(target).read_bytes()),
-                checks=dict(main_text_identical_to_g=True, main_header_only_changes_weak_load_and_sdk26_declaration=True,
+                checks=dict(main_text_identical_to_g=True, main_header_only_adds_weak_glass_load=True,
+                            main_sdk18_preserved_and_only_new_module_declares_sdk26=True,
                             original_entitlements_preserved=True, network_framework_identical=True,
                             original_frameworks_and_assets_identical=True, code_and_resource_seals_valid=True,
                             no_membership_or_image_priority_patches=True),
                 limits=['Native effect rendering and stability require device testing',
                         'Glass only applies to existing BlurView backgrounds inside BaseBarView',
-                        'SDK declaration is a compatibility experiment, not an SDK 26 rebuild',
-                        'New system appearance/layout behavior is not validated; target is iOS 26',
+                        'Main SDK compatibility declaration remains G SDK 18; no C compatibility flags',
+                        'Fresh native backgrounds and temporary comparison card require real rendering confirmation',
                         'iCloud remains disabled'])
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--reproduce-withdrawn-c', action='store_true',
-                        help='Explicit historical reproduction only: user reported C crashes at launch')
     parser.add_argument('baseline', type=Path)
     parser.add_argument('framework', type=Path)
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
-    if not args.reproduce_withdrawn_c:
-        parser.error('Glass C is withdrawn after a device startup crash; do not distribute it. '
-                     'Use the verified G rollback. Historical reproduction requires --reproduce-withdrawn-c.')
     files, entries = load_baseline(args.baseline, settings())
     framework_info = plistlib.dumps(dict(CFBundleIdentifier=IDENTIFIER, CFBundleName='VVGlass',
         CFBundleExecutable='VVGlass', CFBundlePackageType='FMWK', CFBundleVersion='1',
@@ -139,8 +132,7 @@ def main():
         fmt=plistlib.FMT_XML, sort_keys=True)
     framework, cdhash = sign(args.framework.read_bytes(), IDENTIFIER, framework_info, framework_resources)
     info = plistlib.loads(release_info(files[INFO], settings()))
-    info['VVeboGlassExperiment'] = 'sdk26-declaration-comparison-c'
-    info['UIDesignRequiresCompatibility'] = False
+    info['VVeboGlassExperiment'] = 'fresh-native-backgrounds-d'
     files[INFO] = plistlib.dumps(info, fmt=plistlib.FMT_BINARY, sort_keys=False)
     new_files = {PATH + 'VVGlass': framework, PATH + 'Info.plist': framework_info,
                  PATH + '_CodeSignature/CodeResources': framework_resources}
@@ -167,7 +159,7 @@ def main():
     target = args.output / NAME
     write_ipa(target, files, entries)
     report = verify(args.baseline, target)
-    report_path = args.output / 'VVebo-Glass-C-verification.json'
+    report_path = args.output / 'VVebo-Glass-D-verification.json'
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
     print(json.dumps(report, indent=2, ensure_ascii=False))
 

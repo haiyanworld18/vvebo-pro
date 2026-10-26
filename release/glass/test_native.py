@@ -200,7 +200,7 @@ class Model:
             elif sel == 'isKindOfClass:': value = int(self.kind(x0, x2))
             elif sel == 'respondsToSelector:': value = 1
             elif sel == 'superview': value = obj.get('parent', 0)
-            elif sel == 'subviews': value = self.obj('NSArray', items=obj.get('children', []))
+            elif sel == 'subviews': value = self.obj('NSArray', items=list(obj.get('children', [])))
             elif sel == 'windows': value = self.obj('NSArray', items=getattr(self, 'windows', []))
             elif sel == 'count': value = len(obj['items'])
             elif sel == 'objectAtIndex:': value = obj['items'][x2]
@@ -219,6 +219,14 @@ class Model:
             elif sel == 'setCornerConfiguration:':
                 obj['corner'] = x2
                 value = 0
+            elif sel == 'frame':
+                for reg, number in zip((UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3), obj.get('frame', (0., 0., 300., 60.))):
+                    uc.reg_write(reg, struct.unpack('<Q', struct.pack('<d', number))[0])
+                value = 0
+            elif sel == 'setFrame:':
+                obj['frame'] = tuple(struct.unpack('<d', uc.reg_read(reg).to_bytes(8, 'little'))[0] for reg in
+                    (UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3))
+                value = 0
             elif sel == 'bounds':
                 for reg, number in zip((UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3), (0., 0., 390., 844.)):
                     uc.reg_write(reg, struct.unpack('<Q', struct.pack('<d', number))[0])
@@ -232,14 +240,25 @@ class Model:
                 arg = struct.unpack('<Q', uc.mem_read(uc.reg_read(UC_ARM64_REG_SP), 8))[0]
                 text = fmt.replace('%lu', str(arg)) if '%lu' in fmt else fmt.replace('%@', self.string(arg))
                 value = self.obj('NSString', text=text)
+            elif sel == 'colorWithRed:green:blue:alpha:':
+                components = tuple(struct.unpack('<d', uc.reg_read(reg).to_bytes(8, 'little'))[0] for reg in
+                    (UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3))
+                assert components[3] == 1.0
+                value = self.obj('UIColor', rgba=components)
             elif sel in ('secondarySystemBackgroundColor', 'labelColor'): value = self.obj('UIColor')
-            elif sel.startswith('set') and sel in ('setText:', 'setNumberOfLines:', 'setTextAlignment:', 'setUserInteractionEnabled:', 'setBackgroundColor:', 'setTextColor:'):
+            elif sel.startswith('set') and sel in ('setText:', 'setNumberOfLines:', 'setTextAlignment:', 'setUserInteractionEnabled:', 'setBackgroundColor:', 'setTextColor:', 'setAutoresizingMask:'):
                 obj[sel] = x2
                 value = 0
             elif sel == 'addSubview:':
                 obj.setdefault('children', []).append(x2)
                 self.objects[x2]['parent'] = x0
                 self.events.append(('addSubview', x0, x2))
+                value = 0
+            elif sel == 'insertSubview:atIndex:':
+                assert uc.reg_read(UC_ARM64_REG_X3) == 0
+                obj.setdefault('children', []).insert(0, x2)
+                self.objects[x2]['parent'] = x0
+                self.events.append(('insertSubview', x0, x2))
                 value = 0
             elif sel == 'removeFromSuperview':
                 parent = obj.get('parent')
@@ -252,9 +271,15 @@ class Model:
                 self.events.append(('setEffect', x0, x2))
                 value = 0
             elif sel == 'effectWithStyle:':
-                assert x0 == self.classes['UIGlassEffect'] and x2 == 0
-                self.events.append(('factory',))
-                value = self.obj('UIGlassEffect')
+                assert obj['name'] in ('UIGlassEffect', 'UIBlurEffect') and x2 == 1
+                self.events.append(('factory', obj['name']))
+                value = self.obj(obj['name'])
+            elif sel == 'initWithEffect:':
+                obj['effect'] = x2
+                value = x0
+            elif sel == 'contentView':
+                if 'content' not in obj: obj['content'] = self.obj('UIView', parent=x0)
+                value = obj['content']
             elif sel == 'mainBundle': value = self.obj('NSBundle')
             elif sel == 'bundleIdentifier': value = self.obj('NSString', text=self.bundle)
             elif sel == 'isEqualToString:': value = int(self.string(x0) == self.string(x2))
@@ -306,36 +331,37 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('framework', type=Path)
     binary = p.parse_args().framework.read_bytes()
-    m = Model(binary); m.setup_bar(); m.call('_ApplyGlass')
-    assert m.kind(m.objects[m.effect]['effect'], m.classes['UIGlassEffect'])
-    m.call('_ApplyGlass')
-    assert m.events.count(('factory',)) == 1, 'Repeated layout recreated the effect'
-    m.reduced = True; m.call('_ApplyGlass')
-    assert m.objects[m.effect]['effect'] == m.blur, 'Accessibility did not restore original blur'
-    assert m.objects[m.effect].get('corner', 0) == 0, 'Original corner configuration not restored'
     m = Model(binary); m.setup_bar(); plate = m.add_plate()
-    child = m.obj('UILabel'); content = m.add_plate(children=[child])
-    interactive = m.add_plate(interactive=True)
+    content = m.add_plate(children=[m.obj('UILabel')]); interactive = m.add_plate(interactive=True)
     initially_hidden = m.add_plate(hidden=True)
     m.call('_ApplyGlass')
+    fresh = [p for p in m.objects[m.container]['children'] if p != m.effect and m.objects[p]['class'] == 'UIVisualEffectView']
+    assert len(fresh) == 1; fresh = fresh[0]
+    assert m.objects[m.container]['children'][0] == fresh
+    assert m.kind(m.objects[fresh]['effect'], m.classes['UIGlassEffect'])
+    assert m.objects[m.effect]['effect'] == m.blur, 'Old blur object was modified'
+    assert m.objects[m.effect]['hidden'] and m.objects[fresh]['frame'] == (0., 0., 300., 60.)
+    assert m.objects[fresh]['setUserInteractionEnabled:'] == 0 and m.objects[fresh]['corner']
     assert m.objects[plate]['hidden'] and m.objects[initially_hidden]['hidden']
     assert not m.objects[content].get('hidden') and not m.objects[interactive].get('hidden')
-    assert m.objects[m.effect]['corner'] != 0
+    m.objects[m.effect]['frame'] = (1., 2., 320., 70.); m.call('_ApplyGlass')
+    assert m.objects[fresh]['frame'] == (1., 2., 320., 70.)
+    assert m.events.count(('factory', 'UIGlassEffect')) == 1
     m.reduced = True; m.call('_ApplyGlass')
+    assert fresh not in m.objects[m.container]['children'] and not m.objects[m.effect]['hidden']
     assert not m.objects[plate]['hidden'] and m.objects[initially_hidden]['hidden']
-    m = Model(binary); m.setup_bar(inside=False); plate = m.add_plate(); m.call('_ApplyGlass')
-    assert not m.objects[plate].get('hidden'), 'Unrelated color plate was hidden'
-    m = Model(binary); m.setup_bar(); m.objects[m.view]['parent'] = m.obj('_TtC5VVebo10BlurButton', parent=m.objects[m.view]['parent'])
-    m.call('_ApplyGlass'); assert m.objects[m.effect]['effect'] == m.blur, 'Nested button was restyled'
     for inside, vibrancy, reduced, main_thread in ((False, False, False, True),
             (True, True, False, True), (True, False, True, True), (True, False, False, False)):
         m = Model(binary); m.setup_bar(inside, vibrancy); m.reduced = reduced; m.main = main_thread
         m.call('_ApplyGlass')
         assert m.objects[m.effect]['effect'] == m.blur and not m.events
+    m = Model(binary); m.setup_bar(); m.objects[m.view]['parent'] = m.obj('_TtC5VVebo10BlurButton', parent=m.objects[m.view]['parent'])
+    m.call('_ApplyGlass'); assert not m.events
     m = Model(binary); m.setup_bar(); m.call('_GlassLayout')
     assert m.events[0] == ('original', LAYOUT, m.view, MODEL + 0x900, MODEL + 0xA00)
     m.events.clear(); m.call('_GlassStyle')
-    assert m.events[0][0:2] == ('original', STYLE) and m.events[1] == ('factory',)
+    assert m.events[0][0:2] == ('original', STYLE)
+    assert not any(e[0] == 'factory' for e in m.events), 'Theme update duplicated the new background'
     for version, bundle, missing, expected in ((15, 'com.johnil.vvebo', False, 0),
             (26, 'other.bundle', False, 0), (26, 'com.johnil.vvebo', True, 0),
             (26, 'com.johnil.vvebo', False, 2)):
@@ -347,19 +373,22 @@ def main():
         assert len([e for e in m.events if e[0] == 'replace']) == expected
     m = Model(binary); m.setup_bar(); m.add_plate()
     window = m.obj('UIView', children=[m.bar]); m.objects[m.bar]['parent'] = window; m.windows = [window]
-    m.call('_InstallGlass', receiver=0)
-    m.call('_ShowStatus', receiver=0)
-    labels = [p for p, o in m.objects.items() if o['class'] == 'UILabel']
-    assert len(labels) == 1
-    label = labels[0]; info = m.objects[label]
-    assert info['frame'] == (16., 100., 358., 70.)
-    assert '背景替换' in m.string(info['setText:'])
-    assert info['setUserInteractionEnabled:'] == 0
-    assert label in m.objects[window]['children']
-    assert len([e for e in m.events if e[0] == 'scheduled']) == 1
-    m.call('_HideStatus', receiver=0)
-    assert label not in m.objects[window]['children']
-    print('PASS: compiled ARM64 adapter scope, nested blur, vibrancy/button exclusion, reversible structural color-plate removal, capsule configuration, idempotence, accessibility restore, original callback ABI/order, installation guards and stack/register checks.')
+    m.call('_InstallGlass', receiver=0); m.call('_ShowStatus', receiver=0)
+    assert len(m.objects[window]['children']) == 3, 'Expected original UI, status label, comparison card'
+    status = m.objects[window]['children'][1]; card = m.objects[window]['children'][2]
+    assert '已新建' in m.string(m.objects[status]['setText:'])
+    assert m.objects[card]['frame'] == (16., 174., 358., 158.)
+    samples = [m.objects[p] for p in m.objects[card]['children'] if m.objects[p]['class'] == 'UIVisualEffectView']
+    assert len(samples) == 2
+    assert [m.objects[o['effect']]['class'] for o in samples] == ['UIBlurEffect', 'UIGlassEffect']
+    stripes = [m.objects[p] for p in m.objects[card]['children'] if m.objects[p]['class'] == 'UIView']
+    assert len(stripes) == 8
+    colors = [m.objects[o['setBackgroundColor:']]['rgba'] for o in stripes]
+    assert colors[:4] == colors[4:], 'Comparison backgrounds are not identical'
+    assert all(o['setUserInteractionEnabled:'] == 0 for o in samples)
+    scheduled = [e for e in m.events if e[0] == 'scheduled']; assert len(scheduled) == 1 and scheduled[0][1] == 12000000000
+    m.call('_HideStatus', receiver=0); assert m.objects[window]['children'] == [m.bar]
+    print('PASS: actual ARM64 fresh surface creation, original blur/visibility preservation, stacking, geometry refresh, scope exclusions, reversible color plates, transparency fallback, installation guards, original callbacks, native comparison card and timed cleanup.')
     print('LIMIT: Foundation/UIKit/ObjC runtime are modeled; rendering, actual lifecycle and device stability remain unverified.')
 
 
