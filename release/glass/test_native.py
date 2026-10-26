@@ -63,12 +63,12 @@ class Model:
         self.bundle = 'com.johnil.vvebo'
         self.next_id = MODEL + 0x1000
         self.superclasses = {'UIGlassEffect': 'UIVisualEffect', 'UIBlurEffect': 'UIVisualEffect',
-            'UIVibrancyEffect': 'UIVisualEffect', 'UIVisualEffectView': 'UIView', 'UILabel': 'UIView',
+            'UIVibrancyEffect': 'UIVisualEffect', 'UIVisualEffectView': 'UIView', 'UILabel': 'UIView', 'UIButton': 'UIView',
             '_TtC5VVebo8BlurView': 'UIView', '_TtC5VVebo11BaseBarView': 'UIView',
             '_TtC5VVebo6Tabbar': '_TtC5VVebo11BaseBarView'}
         for name in ('UIGlassEffect', 'UIBlurEffect', 'UIVisualEffectView',
                      '_TtC5VVebo8BlurView', '_TtC5VVebo11BaseBarView', 'NSThread',
-                     'UIView', 'UICornerConfiguration', '_TtC5VVebo10BlurButton', 'UILabel', 'UIColor'):
+                     'UIView', 'UICornerConfiguration', '_TtC5VVebo10BlurButton', 'UILabel', 'UIColor', 'UIButton', 'UIButtonConfiguration'):
             self.classes[name] = self.obj('Class', name=name)
         # Rebase selector references and bind the NSThread class import.
         va, length, off, _, _ = self.sections['__objc_selrefs']
@@ -89,11 +89,11 @@ class Model:
             self.q(va + index, self.classes[name])
         for variable, name in (('_glassClass', 'UIGlassEffect'), ('_blurClass', 'UIBlurEffect'),
                 ('_effectViewClass', 'UIVisualEffectView'), ('_blurViewClass', '_TtC5VVebo8BlurView'),
-                ('_barClass', '_TtC5VVebo11BaseBarView'), ('_plainViewClass', 'UIView'),
+                ('_barClass', '_TtC5VVebo11BaseBarView'), ('_buttonClass', 'UIButton'), ('_configurationClass', 'UIButtonConfiguration'), ('_plainViewClass', 'UIView'),
                 ('_cornerClass', 'UICornerConfiguration'), ('_blurButtonClass', '_TtC5VVebo10BlurButton')):
-            self.q(self.symbols[variable], self.classes[name])
+            if variable in self.symbols: self.q(self.symbols[variable], self.classes[name])
         self.q(self.symbols['_originalLayout'], LAYOUT)
-        self.q(self.symbols['_originalStyle'], STYLE)
+        if '_originalStyle' in self.symbols: self.q(self.symbols['_originalStyle'], STYLE)
         status_address = self.symbols['_statusReason']
         self.q(status_address, struct.unpack('<Q', self.uc.mem_read(status_address, 8))[0] & 0xFFFFFFFFF)
         self.uc.hook_add(UC_HOOK_CODE, self.hook)
@@ -198,13 +198,40 @@ class Model:
             obj = self.objects[x0]
             if sel == 'isMainThread': value = int(self.main)
             elif sel == 'isKindOfClass:': value = int(self.kind(x0, x2))
-            elif sel == 'respondsToSelector:': value = 1
+            elif sel == 'respondsToSelector:': value = int(self.cstr(x2) not in getattr(self, 'missing_selectors', set()))
             elif sel == 'superview': value = obj.get('parent', 0)
             elif sel == 'subviews': value = self.obj('NSArray', items=list(obj.get('children', [])))
             elif sel == 'windows': value = self.obj('NSArray', items=getattr(self, 'windows', []))
             elif sel == 'count': value = len(obj['items'])
             elif sel == 'objectAtIndex:': value = obj['items'][x2]
             elif sel == 'effect': value = obj['effect']
+            elif sel == 'configuration': value = obj.get('configuration', 0)
+            elif sel == 'currentTitle': value = obj.get('title', 0)
+            elif sel == 'currentImage': value = obj.get('image', 0)
+            elif sel == 'size':
+                for reg, number in zip((UC_ARM64_REG_D0, UC_ARM64_REG_D1), obj.get('size', (18., 18.))):
+                    uc.reg_write(reg, struct.unpack('<Q', struct.pack('<d', number))[0])
+                value = 0
+            elif sel in ('glassButtonConfiguration', 'prominentGlassButtonConfiguration'):
+                assert obj['name'] == 'UIButtonConfiguration'
+                self.events.append(('buttonFactory', sel))
+                value = self.obj('UIButtonConfiguration', style=sel)
+            elif sel == 'buttonWithType:':
+                assert obj['name'] == 'UIButton' and x2 == 1
+                value = self.obj('UIButton', interactive=True)
+            elif sel == 'setConfiguration:':
+                if x2:
+                    assert self.associations.get((x0, self.symbols['_adaptedKey'])) or self.associations.get((x0, self.symbols['_createdKey'])), 'Reentrancy marker not set before UIKit assignment'
+                obj['configuration'] = x2
+                self.events.append(('setConfiguration', x0, x2))
+                value = 0
+            elif sel in ('setTitle:', 'setImage:', 'setCornerStyle:'):
+                obj[sel] = x2
+                value = 0
+            elif sel == 'setContentInsets:':
+                obj['insets'] = tuple(struct.unpack('<d', uc.reg_read(reg).to_bytes(8, 'little'))[0] for reg in
+                    (UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3))
+                value = 0
             elif sel == 'isUserInteractionEnabled': value = int(obj.get('interactive', True))
             elif sel == 'backgroundColor': value = obj.get('background', 0)
             elif sel == 'isHidden': value = int(obj.get('hidden', False))
@@ -228,7 +255,7 @@ class Model:
                     (UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3))
                 value = 0
             elif sel == 'bounds':
-                for reg, number in zip((UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3), (0., 0., 390., 844.)):
+                for reg, number in zip((UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3), obj.get('bounds', (0., 0., 390., 844.))):
                     uc.reg_write(reg, struct.unpack('<Q', struct.pack('<d', number))[0])
                 value = 0
             elif sel == 'initWithFrame:':
@@ -246,7 +273,7 @@ class Model:
                 assert components[3] == 1.0
                 value = self.obj('UIColor', rgba=components)
             elif sel in ('secondarySystemBackgroundColor', 'labelColor'): value = self.obj('UIColor')
-            elif sel.startswith('set') and sel in ('setText:', 'setNumberOfLines:', 'setTextAlignment:', 'setUserInteractionEnabled:', 'setBackgroundColor:', 'setTextColor:', 'setAutoresizingMask:'):
+            elif sel.startswith('set') and sel in ('setText:', 'setNumberOfLines:', 'setTextAlignment:', 'setUserInteractionEnabled:', 'setBackgroundColor:', 'setTextColor:', 'setAutoresizingMask:', 'setAutomaticallyUpdatesConfiguration:'):
                 obj[sel] = x2
                 value = 0
             elif sel == 'addSubview:':
@@ -331,64 +358,53 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('framework', type=Path)
     binary = p.parse_args().framework.read_bytes()
-    m = Model(binary); m.setup_bar(); plate = m.add_plate()
-    content = m.add_plate(children=[m.obj('UILabel')]); interactive = m.add_plate(interactive=True)
-    initially_hidden = m.add_plate(hidden=True)
-    m.call('_ApplyGlass')
-    fresh = [p for p in m.objects[m.container]['children'] if p != m.effect and m.objects[p]['class'] == 'UIVisualEffectView']
-    assert len(fresh) == 1; fresh = fresh[0]
-    assert m.objects[m.container]['children'][0] == fresh
-    assert m.kind(m.objects[fresh]['effect'], m.classes['UIGlassEffect'])
-    assert m.objects[m.effect]['effect'] == m.blur, 'Old blur object was modified'
-    assert m.objects[m.effect]['hidden'] and m.objects[fresh]['frame'] == (0., 0., 300., 60.)
-    assert m.objects[fresh]['setUserInteractionEnabled:'] == 0 and m.objects[fresh]['corner']
-    assert m.objects[plate]['hidden'] and m.objects[initially_hidden]['hidden']
-    assert not m.objects[content].get('hidden') and not m.objects[interactive].get('hidden')
-    m.objects[m.effect]['frame'] = (1., 2., 320., 70.); m.call('_ApplyGlass')
-    assert m.objects[fresh]['frame'] == (1., 2., 320., 70.)
-    assert m.events.count(('factory', 'UIGlassEffect')) == 1
-    m.reduced = True; m.call('_ApplyGlass')
-    assert fresh not in m.objects[m.container]['children'] and not m.objects[m.effect]['hidden']
-    assert not m.objects[plate]['hidden'] and m.objects[initially_hidden]['hidden']
-    for inside, vibrancy, reduced, main_thread in ((False, False, False, True),
-            (True, True, False, True), (True, False, True, True), (True, False, False, False)):
-        m = Model(binary); m.setup_bar(inside, vibrancy); m.reduced = reduced; m.main = main_thread
-        m.call('_ApplyGlass')
-        assert m.objects[m.effect]['effect'] == m.blur and not m.events
-    m = Model(binary); m.setup_bar(); m.objects[m.view]['parent'] = m.obj('_TtC5VVebo10BlurButton', parent=m.objects[m.view]['parent'])
-    m.call('_ApplyGlass'); assert not m.events
-    m = Model(binary); m.setup_bar(); m.call('_GlassLayout')
+    def create(version=26, inside=True, image=True, title=False, configured=False, bounds=(0., 0., 44., 44.), cls='UIButton'):
+        m = Model(binary); m.os_version = version
+        m.bar = m.obj('_TtC5VVebo6Tabbar' if inside else 'UIView')
+        m.view = m.obj(cls, parent=m.bar, bounds=bounds,
+            image=m.obj('UIImage') if image else 0,
+            title=m.obj('NSString', text='返回') if title else 0,
+            configuration=m.obj('UIButtonConfiguration', style='existing') if configured else 0,
+            actions=['originalTargetAction'], frame=(10., 20., 44., 44.))
+        m.objects[m.bar]['children'] = [m.view]
+        m.call('_InstallNativeButtons', receiver=0)
+        return m
+    m = create(); old = dict(m.objects[m.view]); m.call('_ApplyNativeButton')
+    config = m.objects[m.objects[m.view]['configuration']]
+    assert config['style'] == 'glassButtonConfiguration'
+    assert config['setImage:'] == old['image'] and config['setTitle:'] == old['title']
+    assert config['setCornerStyle:'] == 4 and config['insets'] == (0., 0., 0., 0.)
+    assert m.objects[m.view]['frame'] == old['frame'] and m.objects[m.view]['actions'] == old['actions']
+    m.call('_ApplyNativeButton'); assert len([e for e in m.events if e[0] == 'buttonFactory']) == 1
+    m.reduced = True; m.call('_ApplyNativeButton'); assert m.objects[m.view]['configuration'] == 0
+    for kwargs in (dict(inside=False), dict(image=False), dict(title=True), dict(configured=True),
+                   dict(bounds=(0., 0., 10., 10.)), dict(cls='_TtC5VVebo12TabbarButton')):
+        m = create(**kwargs); before = dict(m.objects[m.view]); m.call('_ApplyNativeButton')
+        assert m.objects[m.view] == before
+    m = create(); m.events.clear(); m.call('_NativeButtonLayout')
     assert m.events[0] == ('original', LAYOUT, m.view, MODEL + 0x900, MODEL + 0xA00)
-    m.events.clear(); m.call('_GlassStyle')
-    assert m.events[0][0:2] == ('original', STYLE)
-    assert not any(e[0] == 'factory' for e in m.events), 'Theme update duplicated the new background'
-    for version, bundle, missing, expected in ((15, 'com.johnil.vvebo', False, 0),
-            (26, 'other.bundle', False, 0), (26, 'com.johnil.vvebo', True, 0),
-            (26, 'com.johnil.vvebo', False, 2)):
-        m = Model(binary); m.setup_bar(); m.os_version = version; m.bundle = bundle
-        if missing: del m.classes['UIGlassEffect']
-        m.call('_InstallGlass', receiver=0)
-        assert len([e for e in m.events if e[0] == 'replace']) == expected
-        m.call('_InstallGlass', receiver=0)
-        assert len([e for e in m.events if e[0] == 'replace']) == expected
-    m = Model(binary); m.setup_bar(); m.add_plate()
-    window = m.obj('UIView', children=[m.bar]); m.objects[m.bar]['parent'] = window; m.windows = [window]
-    m.call('_InstallGlass', receiver=0); m.call('_ShowStatus', receiver=0)
-    assert len(m.objects[window]['children']) == 3, 'Expected original UI, status label, comparison card'
-    status = m.objects[window]['children'][1]; card = m.objects[window]['children'][2]
-    assert '已新建' in m.string(m.objects[status]['setText:'])
-    assert m.objects[card]['frame'] == (16., 174., 358., 158.)
-    samples = [m.objects[p] for p in m.objects[card]['children'] if m.objects[p]['class'] == 'UIVisualEffectView']
-    assert len(samples) == 2
-    assert [m.objects[o['effect']]['class'] for o in samples] == ['UIBlurEffect', 'UIGlassEffect']
-    stripes = [m.objects[p] for p in m.objects[card]['children'] if m.objects[p]['class'] == 'UIView']
-    assert len(stripes) == 8
-    colors = [m.objects[o['setBackgroundColor:']]['rgba'] for o in stripes]
-    assert colors[:4] == colors[4:], 'Comparison backgrounds are not identical'
-    assert all(o['setUserInteractionEnabled:'] == 0 for o in samples)
-    scheduled = [e for e in m.events if e[0] == 'scheduled']; assert len(scheduled) == 1 and scheduled[0][1] == 12000000000
-    m.call('_HideStatus', receiver=0); assert m.objects[window]['children'] == [m.bar]
-    print('PASS: actual ARM64 fresh surface creation, original blur/visibility preservation, stacking, geometry refresh, scope exclusions, reversible color plates, transparency fallback, installation guards, original callbacks, native comparison card and timed cleanup.')
+    m = create(); m.objects[m.objects[m.view]['image']]['size'] = (160., 160.)
+    m.call('_ApplyNativeButton'); assert m.objects[m.view]['configuration'] == 0
+    for version, missing in ((15, set()), (26, {'glassButtonConfiguration'})):
+        m = Model(binary); m.setup_bar(); m.os_version = version; m.missing_selectors = missing
+        m.call('_InstallNativeButtons', receiver=0)
+        assert not any(e[0] == 'replace' for e in m.events)
+    m = create(); window = m.obj('UIView', children=[m.bar]); m.objects[m.bar]['parent'] = window; m.windows = [window]
+    m.call('_ShowControls', receiver=0)
+    assert len(m.objects[window]['children']) == 3
+    card = m.objects[window]['children'][2]
+    assert m.objects[card]['setUserInteractionEnabled:'] == 1
+    buttons = [m.objects[p] for p in m.objects[card]['children'] if m.objects[p]['class'] == 'UIButton']
+    assert len(buttons) == 2 and all(o['setUserInteractionEnabled:'] == 1 for o in buttons)
+    assert all(o['setAutomaticallyUpdatesConfiguration:'] == 1 for o in buttons)
+    assert [m.objects[o['configuration']]['style'] for o in buttons] == ['glassButtonConfiguration', 'prominentGlassButtonConfiguration']
+    assert all(o.get('actions', []) == [] for o in buttons)
+    assert [e for e in m.events if e[0] == 'scheduled'][0][1] == 20000000000
+    sample = next(p for p in m.objects[card]['children'] if m.objects[p]['class'] == 'UIButton')
+    m.call('_ApplyNativeButton', receiver=sample)
+    assert m.objects[sample]['configuration'] == buttons[0]['configuration']
+    m.call('_HideControls', receiver=0); assert m.objects[window]['children'] == [m.bar]
+    print('PASS: compiled ARM64 native glass-button configuration, scope/eligibility guards, image/title/insets preservation, original frame/action data unchanged, reentrancy markers, idempotence, transparency restore, original callback, interactive system-button samples and cleanup.')
     print('LIMIT: Foundation/UIKit/ObjC runtime are modeled; rendering, actual lifecycle and device stability remain unverified.')
 
 

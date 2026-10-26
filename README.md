@@ -6,17 +6,19 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
-## 液态玻璃需求未实现
+## 原生控件路线 E：第一阶段验证
 
-用户再次确认 D 没有任何效果，并明确要求 iOS 26 液态玻璃的折射、边缘高光及交互形变，不能以普通磨砂或半透明背景替代。
+用户明确要求 iOS 26 原生液态玻璃视觉与交互，并要求继续开始实现。E 改用系统专用 `UIButtonConfiguration.glassButtonConfiguration` 与 `prominentGlassButtonConfiguration`，不是继续替换模糊背景。**尚未完成全 App 或自定义底栏的迁移，也未证实真机显示/交互成功。**
 
-A 无视觉变化；B 虽提示两次替换仍无变化；C 启动闪退；D 的新背景与样例也没有实现用户所需效果。所有实验均标记未实现，移除可用版安装推荐。历史文件只保留用于审计，默认构建被阻止，不作为完成适配发布。
+[下载原生控件 E 验证包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.2.0-e/downloads/VVebo-3.3.31-NativeControls-E.ipa) · [说明](downloads/VVebo-NativeControls-E-说明.txt) · [实现与检查](release/glass/README.md) · [源码](downloads/VVebo-NativeControls-E-source.zip) · [校验值](downloads/VVebo-NativeControls-E-SHA256.json)
 
-现有代码只尝试了背景材质，并未重建原有按钮或导航控件的原生玻璃交互；后台 API 对象创建、替换次数、离线模型通过都不能证明真实玻璃渲染或交互成功。C 的启动失败原因也未得到崩溃栈确认。当前离线环境缺乏 iOS 26 UIKit 运行与真机调试能力，不能把未验证的视觉方案交付为完成品。
+打开约两秒后出现两个可操作的系统按钮，可按住、滑出并松开观察 UIKit 原生状态变化，卡片约二十秒后移除。按钮没有业务动作，不执行登录、发布、购买或账号修改。E 同时尝试给原栏中未使用 configuration 的小型图标 UIButton 配置系统玻璃样式，保留原对象和点击注册。
 
-[用户此前确认正常的 G 原包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/e97e673/downloads/VVebo-3.3.31-iPhone17-Display-G.ipa)保留主页和显示修复，可完整重签覆盖回退，不先卸载或清数据。G 不包含玻璃或会员实验。
+底部 TabbarButton 继承自定义 UIControl，不能直接使用 UIButton 配置；文字/状态按钮与这部分底栏均暂未迁移。原按钮配置数量可以为零，数量不代表视觉成功。只有样例与原按钮的实机结果都明确后，才有依据继续迁移自定义控件。
 
-继续实现需要针对原控件的运行时视图/渲染证据，重建必要的玻璃控件并在 iOS 26 上实际验证，不能仅靠继续更换模糊参数或 SDK 标签认定成功。
+桌面名称 **VVebo 控件E**，构建号 **4.2001**。从 G 重建，主程序保持 SDK 18 与全部原指令，不携带 C 的兼容声明实验；云同步仍关闭，无会员补丁。完整重签覆盖，不先卸载。
+
+A/B/D 没有达到要求，C 启动闪退，这些实验仍标记失败，不作为成功适配宣传。E 是新的控件路线验证，离线模型通过不等于真机成功；G 原包仍可完整重签覆盖回退。
 
 ## 本地 Pro 测试版已撤回
 

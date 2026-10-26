@@ -16,8 +16,8 @@ from package import APP, MAIN, INFO, RESOURCES, load_baseline, release_info, sha
 from signing import commands, refresh_seal, require, signature_slots, verify_seal
 from macho_support import sign
 
-VERSION = '1.1.0-glass.4'
-NAME = 'VVebo-3.3.31-Glass-D.ipa'
+VERSION = '1.2.0-controls.1'
+NAME = 'VVebo-3.3.31-NativeControls-E.ipa'
 IDENTIFIER = 'com.vvebo.compat.VVGlass'
 REL = 'Frameworks/VVGlass.framework/'
 PATH = APP + REL
@@ -27,7 +27,7 @@ LOAD_PATH = '@executable_path/Frameworks/VVGlass.framework/VVGlass'
 
 
 def settings():
-    return dict(version=VERSION, build='4.1904', display_name='VVebo 玻璃D',
+    return dict(version=VERSION, build='4.2001', display_name='VVebo 控件E',
                 bundle_id='com.johnil.vvebo', app_version='3.3.31',
                 baseline_sha256=BASELINE, profile_framework_sha256=PROFILE)
 
@@ -67,7 +67,7 @@ def verify(baseline, target):
             'Unplanned baseline changes')
     info = plistlib.loads(files[INFO])
     expected_info = plistlib.loads(release_info(original[INFO], settings()))
-    expected_info['VVeboGlassExperiment'] = 'fresh-native-backgrounds-d'
+    expected_info['VVeboNativeControlsExperiment'] = 'native-glass-button-configurations-e'
     require(info == expected_info, 'Unplanned Info settings')
     require(not info.get('VVeboLocalProEnabled'), 'Paid flag must not be present')
     expected, offsets = command(original[MAIN])
@@ -110,24 +110,18 @@ def verify(baseline, target):
                             original_frameworks_and_assets_identical=True, code_and_resource_seals_valid=True,
                             no_membership_or_image_priority_patches=True),
                 limits=['Native effect rendering and stability require device testing',
-                        'Glass only applies to existing BlurView backgrounds inside BaseBarView',
+                        'Only eligible original UIButtons inside BaseBarView are configured; custom UIControls are not migrated',
                         'Main SDK compatibility declaration remains G SDK 18; no C compatibility flags',
-                        'Fresh native backgrounds and temporary comparison card require real rendering confirmation',
+                        'UIKit glass-button rendering, press transitions and original button behavior require on-device confirmation',
                         'iCloud remains disabled'])
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--reproduce-failed-experiment', action='store_true',
-                        help='Historical research only; D did not produce the requested Liquid Glass effect')
     parser.add_argument('baseline', type=Path)
     parser.add_argument('framework', type=Path)
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
-    if not args.reproduce_failed_experiment:
-        parser.error('Glass experiments did not achieve the requested on-device Liquid Glass effect. '
-                     'Do not distribute as a working adaptation. Historical reproduction requires '
-                     '--reproduce-failed-experiment.')
     files, entries = load_baseline(args.baseline, settings())
     framework_info = plistlib.dumps(dict(CFBundleIdentifier=IDENTIFIER, CFBundleName='VVGlass',
         CFBundleExecutable='VVGlass', CFBundlePackageType='FMWK', CFBundleVersion='1',
@@ -138,7 +132,7 @@ def main():
         fmt=plistlib.FMT_XML, sort_keys=True)
     framework, cdhash = sign(args.framework.read_bytes(), IDENTIFIER, framework_info, framework_resources)
     info = plistlib.loads(release_info(files[INFO], settings()))
-    info['VVeboGlassExperiment'] = 'fresh-native-backgrounds-d'
+    info['VVeboNativeControlsExperiment'] = 'native-glass-button-configurations-e'
     files[INFO] = plistlib.dumps(info, fmt=plistlib.FMT_BINARY, sort_keys=False)
     new_files = {PATH + 'VVGlass': framework, PATH + 'Info.plist': framework_info,
                  PATH + '_CodeSignature/CodeResources': framework_resources}
@@ -165,7 +159,7 @@ def main():
     target = args.output / NAME
     write_ipa(target, files, entries)
     report = verify(args.baseline, target)
-    report_path = args.output / 'VVebo-Glass-D-verification.json'
+    report_path = args.output / 'VVebo-NativeControls-E-verification.json'
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
     print(json.dumps(report, indent=2, ensure_ascii=False))
 

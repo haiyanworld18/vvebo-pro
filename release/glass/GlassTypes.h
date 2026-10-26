@@ -1,6 +1,7 @@
 // Public SDK declarations only. Implementations are supplied by iOS.
 #import "../network/AppleTypes.h"
 typedef struct { NSInteger majorVersion, minorVersion, patchVersion; } NSOperatingSystemVersion;
+typedef struct { CGFloat top, leading, bottom, trailing; } NSDirectionalEdgeInsets;
 @interface NSProcessInfo : NSObject
 + (NSProcessInfo *)processInfo;
 @property(readonly) NSOperatingSystemVersion operatingSystemVersion;
@@ -37,6 +38,21 @@ typedef struct { NSInteger majorVersion, minorVersion, patchVersion; } NSOperati
 @property(strong) id effect;
 @property(readonly) UIView *contentView;
 @end
+@interface UIButtonConfiguration : NSObject
+@property(copy) NSString *title;
+@property(strong) id image;
+@property NSInteger cornerStyle;
+@property NSDirectionalEdgeInsets contentInsets;
+@end
+@interface UIImage : NSObject
+@property(readonly) CGSize size;
+@end
+@interface UIButton : UIView
+@property(copy) UIButtonConfiguration *configuration;
+@property BOOL automaticallyUpdatesConfiguration;
+@property(readonly) NSString *currentTitle;
+@property(readonly) id currentImage;
+@end
 @interface UIApplication : NSObject
 + (UIApplication *)sharedApplication;
 @property(readonly) NSArray *windows;
@@ -47,6 +63,9 @@ typedef struct { NSInteger majorVersion, minorVersion, patchVersion; } NSOperati
 + (id)secondarySystemBackgroundColor;
 + (id)labelColor;
 + (id)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
++ (UIButton *)buttonWithType:(NSInteger)type;
++ (UIButtonConfiguration *)glassButtonConfiguration;
++ (UIButtonConfiguration *)prominentGlassButtonConfiguration;
 @end
 extern BOOL UIAccessibilityIsReduceTransparencyEnabled(void);
 extern struct dispatch_queue_s _dispatch_main_q;

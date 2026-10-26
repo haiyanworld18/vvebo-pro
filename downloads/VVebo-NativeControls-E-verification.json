@@ -1,0 +1,24 @@
+{
+  "version": "1.2.0-controls.1",
+  "artifact": "VVebo-3.3.31-NativeControls-E.ipa",
+  "build": "4.2001",
+  "bytes": 22489577,
+  "sha256": "718b32b46fc9b5da96bb7de3c876cca3484ed7487dfb67b48f2f4e0c22ee7ad6",
+  "checks": {
+    "main_text_identical_to_g": true,
+    "main_header_only_adds_weak_glass_load": true,
+    "main_sdk18_preserved_and_only_new_module_declares_sdk26": true,
+    "original_entitlements_preserved": true,
+    "network_framework_identical": true,
+    "original_frameworks_and_assets_identical": true,
+    "code_and_resource_seals_valid": true,
+    "no_membership_or_image_priority_patches": true
+  },
+  "limits": [
+    "Native effect rendering and stability require device testing",
+    "Only eligible original UIButtons inside BaseBarView are configured; custom UIControls are not migrated",
+    "Main SDK compatibility declaration remains G SDK 18; no C compatibility flags",
+    "UIKit glass-button rendering, press transitions and original button behavior require on-device confirmation",
+    "iCloud remains disabled"
+  ]
+}

@@ -1,3 +1,12 @@
+# 原生控件 E（1.2.0-controls.1，第一阶段）
+
+- 用户要求继续开始原生液态玻璃实现。停止背景材质方案，改用 iOS 26 的系统 glassButtonConfiguration/prominentGlassButtonConfiguration。
+- 给原栏内符合范围和尺寸条件的未配置图标 UIButton 应用玻璃配置；保留原对象、frame、图标和 target/action 注册，文字/状态按钮及自定义 UIControl 底栏暂不迁移。
+- 增加两个可直接按压的系统 UIButton 样例，启用 UIKit 自动配置状态更新；未注册业务动作，二十秒后移除。
+- 模块编译产物不含 UIBlurEffect/UIGlassEffect/effectWithStyle 工厂调用；原主程序与 G 相同，兼容声明保持 SDK 18。
+- 模型检查配置 API、作用范围、内容/原动作数据、重入标志、透明度恢复、原回调与样例交互属性/清理；不验证 UIKit 真实动画/渲染。
+- 这是新的控件路线验证，未完成全 App 适配；A/B/D 失败、C 闪退的历史结果保持记录。
+
 # 液态玻璃实验统一标记未实现
 
 - 用户确认 D 无效果，并明确要求原生液态玻璃的视觉和交互，不能用磨砂替代。

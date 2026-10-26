@@ -1,59 +1,50 @@
-# 未实现用户要求的液态玻璃
+# 原生控件 E：第一阶段实现与验证
 
-用户确认 D 仍无任何效果，并强调目标是液态玻璃而非磨砂。此前 A/B 无视觉变化，C 启动闪退，所有实验都未实现目标。以下仅为历史实现记录，不是有效适配方案。
+用户要求继续实现 iOS 26 原生液态玻璃效果。A/B/D 的背景材质尝试没有达到要求，C 启动闪退，这些结论不更改。E 改走系统控件配置路线，不宣称全 App 已完成或真机效果已成功。
 
-现有实现只尝试背景材质，且效果未在用户真机上成功，不包含原按钮/导航控件的完整原生玻璃交互。对象创建、计数、模型执行和代码校验都不证明折射、高光或交互形变成功。当前离线环境没有 iOS 26 UIKit 渲染/真机调试能力，后续需要真实运行证据与控件重建。
+产物 `VVebo-3.3.31-NativeControls-E.ipa`，桌面名称 **VVebo 控件E**，构建号 **4.2001**，固定 G 底包，原主程序 SDK 18、全部 __text 与原框架保持 G；只新增适配框架和加载声明。无 C 的 SDK 26 主程序声明，无会员修改，云同步仍关闭。新增框架自身使用 SDK 26 声明及运行时 API 检查。
 
-脚本默认拒绝生成 D；审计复现必须显式加 `--reproduce-failed-experiment`。历史文件与标签保留，不能重新分发为已实现功能的版本。
+## 原生 UIKit 控件
 
----
+SDK 26 的 UIButtonConfiguration.h 明确提供：
 
-# 玻璃 D：新建原生背景与可见对照
+- `+glassButtonConfiguration`
+- `+prominentGlassButtonConfiguration`
 
-产物 `VVebo-3.3.31-Glass-D.ipa`，桌面名称 **VVebo 玻璃D**，构建号 **4.1904**，固定用户确认可用的 G 为底包。用户要求在 A/B 无视觉变化、C 启动闪退后继续实现。C 保持撤回，其 SDK 声明方案不沿用。
+UIButton.h 说明非 nil configuration 会启用配置型按钮行为；automaticallyUpdatesConfiguration 控制其状态自动更新。E 的样例使用真实 UIButton 和这两种系统配置，允许触摸并显式启用自动状态更新。不自绘折射、不模拟高光、不手写按压动画。UIKit 的真实显示及形变是否在当前旧 App 兼容环境生效，仍需真机验证。
 
-## 新方案
+E 的编译模块不再使用 UIBlurEffect、UIGlassEffect 或 effectWithStyle。API 依据为 iOS-SDKs 镜像 `iPhoneOS26.0.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIButtonConfiguration.h` 和 `UIButton.h`（2026-10-26 核对）。
 
-A/B 在旧 UIVisualEffectView 上设置 UIGlassEffect；B 已在真机显示两次替换，但没有可见变化。D 测试不同的整合方式：直接以公开 UIGlassEffect clear 材质初始化一个新的 UIVisualEffectView，而非给旧实例更换 effect。
+## 原按钮适配范围
 
-原 BlurView 位于 BaseBarView 内且不在嵌套 BlurButton 下时，找到其原 UIBlurEffect 视图，在同一容器的 index 0 插入新玻璃视图。复制原 frame、使用 G 的 flexible width/height mask，且每次原布局回调之后重新对齐；启用公开 capsuleConfiguration。原按钮、文字和触摸处理不改动。
+仅处理 BaseBarView 后代中，原 configuration 为 nil、24~180 × 24~88 point、有图标（固有尺寸不超过 64 point）而无标题的 UIButton。保存原对象与 target/action 注册，配置使用原图标、capsule 圆角与零 contentInsets；没有事件复制/转发，没有重建原事件目标。文字/关注状态按钮、照片/大头像、已有 configuration、空内容、大图按钮区以及非目标页面跳过。
 
-原模糊视图的 effect 对象完全保留，保存其原 hidden 状态后隐藏。新视图通过关联对象复用，不在每次布局重复创建；其父视图由 UIKit 管理。系统降低透明度或离开目标范围时，移除新视图并还原旧视图的可见状态。原底色板沿用 B 的有界、结构识别方式暂时隐藏及恢复，不读取 Swift ivar 或偏好。
+只在 UIButton 自有类上添加/替换 layoutSubviews 入口，先调用保存的原 IMP，再检查范围。设置配置前写入标志，防止 UIKit 布局重入造成重复配置。开启降低透明度或离开目标栏时，恢复原来的 nil configuration。
 
-玻璃视图不接收触摸，因此本版不声称实现系统按钮的交互形变。clear 材质可能影响复杂背景上的前景可读性，仍需实机观察；它不是完整的全 App 界面重构。
+配置型 UIButton 会改变部分旧 inset/layout API 的行为，实际图标排布、状态变化、原操作仍需真机检查。不能把模型中的原事件数据保持等同于完整 UIKit 行为验证。
 
-## 真机视觉对照
+原 TabbarButton 继承 BlurButton，BlurButton 继承 UIControl，不是 UIButton。它不能直接使用上述配置，因此当前未迁移自定义底栏。原按钮计数为零不等于 API 失败，样例用于独立确认系统控件路线。不得将当前阶段描述成整个 VVebo 的液态玻璃适配完成。
 
-主队列安装后约两秒，在原窗口上显示一次对照卡。八个色块构成重复图案，左右各四个完全相同；左侧新建 UIBlurEffect 对照，右侧新建 UIGlassEffect clear。两侧效果视图均使用同样的 frame 尺寸和胶囊形状。卡片及状态标签约十二秒后移除，不拦截触摸，不使用持续轮询或帧循环。
+## 可操作样例
 
-这提供的是待检查样例，文字“原生玻璃”及“已新建 N 处”不证明系统成功渲染。应观察样例与真实底栏，并反馈是否有视觉差异；只有样例变、底栏不变时，需进一步诊断原栏整合。模型无法替用户判断这个结果。
+启动约两秒后显示一个临时面板。两个系统 UIButton 分别使用 standard/prominent glass 配置，可以按住、滑出再松开。样例没有业务 target/action，不能触发登录、发布、购买或改账号数据。面板允许触摸，约二十秒后移除，不增加持续轮询。
 
-## 保持 G 主程序行为
+原控件计数与样例标题只反映配置代码或预期类型，不证明真实折射、高光或按压形变。需要实机观察并反馈结果；当前云环境无 iOS UIKit 运行时，模型无法填补这一点。
 
-- 主程序 LC_BUILD_VERSION 的 SDK 保持 18.0、最低版本保持 14.0，所有 __text 与 G 一致。
-- 不写入 C 的 UIDesignRequiresCompatibility=false，不改原 DTSDK 构建元数据。
-- 所有原框架、资源和原权限与 G 一致；增加 VVGlass 框架及弱加载声明、更新元数据/签名。
-- 仅新增、无 Swift 代码的适配框架声明 SDK 26、最低 iOS 14。新系统类使用运行时查找，iOS 26 以下不创建玻璃。原 App 没有使用 SDK 26 重新编译。
-- 不含会员、图片调度或首次云等待分支的实验补丁；云同步保持关闭。
+## 构建与检查
 
-## 构建与校验
-
-Zig 0.13.0、ld64.lld 19.1.7、Python 3；执行 ARM64 模型另需 unicorn。头文件仅声明公开 API，链接 stub 明确系统提供方。
+Zig 0.13.0、ld64.lld 19.1.7、Python 3；模型另需 unicorn。公开 API 声明与系统符号提供方由本目录头文件、stub 记录。
 
 ```bash
 ZIG_BIN=/path/to/zig LD64_LLD_BIN=/path/to/ld64.lld bash release/glass/build.sh
-python3 release/glass/package_glass.py /path/to/G.ipa /tmp/vvebo-glass-native/VVGlass /tmp/vvebo-glass-package
+python3 release/glass/package_glass.py /path/to/G.ipa /tmp/vvebo-glass-native/VVGlass /tmp/vvebo-native-controls-package
 PYTHONPATH=/path/to/unicorn python3 release/glass/test_native.py /tmp/vvebo-glass-native/VVGlass
 ```
 
-固定 G SHA256：`543f3c816da02bbef4ec6757058381114674e1abc0e3143ed7d87f47f472167c`。
+模型执行编译 ARM64，替身实现 ObjC/UIKit/Foundation，检查系统/类型/范围门禁、原图标与原 frame/action 数据未被代码重写、配置参数及 Insets ABI、重入标志、重复布局、透明度恢复、原回调接收者/参数与顺序、样例配置/触摸/自动更新属性与清理。
 
-模型运行编译产物的实际 ARM64，替身实现 ObjC/UIKit/Foundation。检查新视图创建、index 0 插入、frame ABI 与后续更新、旧对象不修改、重复布局复用、类型/范围排除、透明度回退、底色恢复、原回调参数/顺序、栈/寄存器，以及两种材质对照卡和定时清理。打包检查原程序 __text、原框架、SDK/权限、代码和资源哈希；源码包可重建相同框架与 IPA。
+打包校验原程序 __text、SDK、权限、原资源/网络框架相同，以及新框架、代码与资源签名哈希。源码压缩包应可重建相同框架与 IPA。这些检查不证明 UIKit 真正绘制或动画、签名信任、完整生命周期和稳定性。
 
-这些检查不证明真实 UIKit 的渲染、生命周期、签名信任或稳定性；不宣称帧率、加载速度改善。A/B 无可见效果、C 启动闪退均完整保留为历史反馈，没有因模型通过而覆盖这些事实。
+## 安装
 
-## 使用
-
-全能签完整重签（含新增框架）后覆盖安装，不先卸载或清数据。异常时完整重签并覆盖已验证 G。
-
-API 核对来自 iOS 26 SDK 镜像的 UIGlassEffect.h 与 UICornerConfiguration.h：effectWithStyle 的 regular=0、clear=1；UICornerConfiguration 提供 capsuleConfiguration。采用公开 API，不使用私有玻璃滤镜或自绘边框冒充原生玻璃。
+全能签完整重签（含新增框架）后覆盖，不先卸载/清数据。若发生异常，完整重签覆盖已验证的 G 原包回退。

@@ -1,0 +1,23 @@
+{
+  "release": "1.2.0-controls.1",
+  "scope": "First-stage native UIKit glass-button configuration validation, not complete UI migration",
+  "checks": {
+    "source_archive_reproduces_identical_framework_and_ipa": true,
+    "compiled_module_has_glass_button_and_prominent_glass_button_configuration_selectors": true,
+    "compiled_module_has_no_blur_or_glass_effect_factory_strings": true,
+    "arm64_configuration_scope_and_icon_photo_guards_model_passed": true,
+    "source_does_not_register_or_relay_original_actions": true,
+    "original_object_frame_action_data_preserved_in_model": true,
+    "configuration_reentrancy_markers_precede_assignment": true,
+    "sample_buttons_interactive_and_auto_update_configuration_enabled": true,
+    "sample_buttons_have_no_business_actions": true,
+    "sample_panel_cleanup_model_passed": true
+  },
+  "device_verified": false,
+  "limitations": [
+    "UIKit/Foundation/ObjC are modeled; real glass rendering and press transitions are unverified",
+    "Only eligible compact icon UIButtons are configured; custom UIControl bottom bar remains unmigrated",
+    "Original UIKit layout and event behavior still require device verification",
+    "No claim of full App liquid-glass completion; A/B/D visual failures and C startup crash remain recorded"
+  ]
+}
