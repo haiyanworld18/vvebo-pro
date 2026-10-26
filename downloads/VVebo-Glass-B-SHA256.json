@@ -1,0 +1,22 @@
+{
+  "VVebo-3.3.31-Glass-B.ipa": {
+    "bytes": 22489723,
+    "sha256": "74e967c8e8d2645e59dd6eae8d67fd0315c4fb4b715326dd46dde7c1800edbb1"
+  },
+  "VVebo-Glass-B-audit.json": {
+    "bytes": 2748,
+    "sha256": "d69bff40899d1041f118fa7a0ad68a7188663cc762d6dad47696f2fa9085759f"
+  },
+  "VVebo-Glass-B-source.zip": {
+    "bytes": 31450,
+    "sha256": "34b2d2bdd8fca01f5438188b662addcbde5cc327b4e8054adbdfeb6798b62dc0"
+  },
+  "VVebo-Glass-B-verification.json": {
+    "bytes": 777,
+    "sha256": "998a2792c814e73fd00ebef340f4d3c8c852075d910aa810f565c733810acb87"
+  },
+  "VVebo-Glass-B-说明.txt": {
+    "bytes": 1067,
+    "sha256": "dd39826c2c7ae4cd45c5c136fd6bc970920da05f00ae3f1ae9c4623320c40a97"
+  }
+}

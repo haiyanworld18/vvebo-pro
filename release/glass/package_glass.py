@@ -16,8 +16,8 @@ from package import APP, MAIN, INFO, RESOURCES, load_baseline, release_info, sha
 from signing import commands, refresh_seal, require, signature_slots, verify_seal
 from macho_support import sign
 
-VERSION = '1.1.0-glass.1'
-NAME = 'VVebo-3.3.31-Glass-A.ipa'
+VERSION = '1.1.0-glass.2'
+NAME = 'VVebo-3.3.31-Glass-B.ipa'
 IDENTIFIER = 'com.vvebo.compat.VVGlass'
 REL = 'Frameworks/VVGlass.framework/'
 PATH = APP + REL
@@ -27,7 +27,7 @@ LOAD_PATH = '@executable_path/Frameworks/VVGlass.framework/VVGlass'
 
 
 def settings():
-    return dict(version=VERSION, build='4.1901', display_name='VVebo 玻璃A',
+    return dict(version=VERSION, build='4.1902', display_name='VVebo 玻璃B',
                 bundle_id='com.johnil.vvebo', app_version='3.3.31',
                 baseline_sha256=BASELINE, profile_framework_sha256=PROFILE)
 
@@ -67,7 +67,7 @@ def verify(baseline, target):
             'Unplanned baseline changes')
     info = plistlib.loads(files[INFO])
     expected_info = plistlib.loads(release_info(original[INFO], settings()))
-    expected_info['VVeboGlassExperiment'] = 'scoped-native-bars-a'
+    expected_info['VVeboGlassExperiment'] = 'scoped-native-bars-b'
     require(info == expected_info, 'Unplanned Info settings')
     require(not info.get('VVeboLocalProEnabled'), 'Paid flag must not be present')
     expected, offsets = command(original[MAIN])
@@ -124,7 +124,7 @@ def main():
         fmt=plistlib.FMT_XML, sort_keys=True)
     framework, cdhash = sign(args.framework.read_bytes(), IDENTIFIER, framework_info, framework_resources)
     info = plistlib.loads(release_info(files[INFO], settings()))
-    info['VVeboGlassExperiment'] = 'scoped-native-bars-a'
+    info['VVeboGlassExperiment'] = 'scoped-native-bars-b'
     files[INFO] = plistlib.dumps(info, fmt=plistlib.FMT_BINARY, sort_keys=False)
     new_files = {PATH + 'VVGlass': framework, PATH + 'Info.plist': framework_info,
                  PATH + '_CodeSignature/CodeResources': framework_resources}
@@ -151,7 +151,7 @@ def main():
     target = args.output / NAME
     write_ipa(target, files, entries)
     report = verify(args.baseline, target)
-    report_path = args.output / 'VVebo-Glass-A-verification.json'
+    report_path = args.output / 'VVebo-Glass-B-verification.json'
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
     print(json.dumps(report, indent=2, ensure_ascii=False))
 

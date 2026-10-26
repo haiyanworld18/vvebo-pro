@@ -9,7 +9,9 @@ from pathlib import Path
 from unicorn import Uc, UC_ARCH_ARM64, UC_MODE_ARM, UC_HOOK_CODE
 from unicorn.arm64_const import (UC_ARM64_REG_PC, UC_ARM64_REG_SP,
     UC_ARM64_REG_LR, UC_ARM64_REG_X0, UC_ARM64_REG_X1, UC_ARM64_REG_X2,
-    UC_ARM64_REG_X8, UC_ARM64_REG_X19, UC_ARM64_REG_X20, UC_ARM64_REG_FP)
+    UC_ARM64_REG_X8, UC_ARM64_REG_X19, UC_ARM64_REG_X20, UC_ARM64_REG_FP,
+    UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3,
+    UC_ARM64_REG_X3)
 
 MODEL, STACK, STOP, LAYOUT, STYLE = 0x300000000, 0x400000000, 0x300010000, 0x300010100, 0x300010200
 
@@ -61,11 +63,12 @@ class Model:
         self.bundle = 'com.johnil.vvebo'
         self.next_id = MODEL + 0x1000
         self.superclasses = {'UIGlassEffect': 'UIVisualEffect', 'UIBlurEffect': 'UIVisualEffect',
-            'UIVibrancyEffect': 'UIVisualEffect', 'UIVisualEffectView': 'UIView',
+            'UIVibrancyEffect': 'UIVisualEffect', 'UIVisualEffectView': 'UIView', 'UILabel': 'UIView',
             '_TtC5VVebo8BlurView': 'UIView', '_TtC5VVebo11BaseBarView': 'UIView',
             '_TtC5VVebo6Tabbar': '_TtC5VVebo11BaseBarView'}
         for name in ('UIGlassEffect', 'UIBlurEffect', 'UIVisualEffectView',
-                     '_TtC5VVebo8BlurView', '_TtC5VVebo11BaseBarView', 'NSThread'):
+                     '_TtC5VVebo8BlurView', '_TtC5VVebo11BaseBarView', 'NSThread',
+                     'UIView', 'UICornerConfiguration', '_TtC5VVebo10BlurButton', 'UILabel', 'UIColor'):
             self.classes[name] = self.obj('Class', name=name)
         # Rebase selector references and bind the NSThread class import.
         va, length, off, _, _ = self.sections['__objc_selrefs']
@@ -86,10 +89,13 @@ class Model:
             self.q(va + index, self.classes[name])
         for variable, name in (('_glassClass', 'UIGlassEffect'), ('_blurClass', 'UIBlurEffect'),
                 ('_effectViewClass', 'UIVisualEffectView'), ('_blurViewClass', '_TtC5VVebo8BlurView'),
-                ('_barClass', '_TtC5VVebo11BaseBarView')):
+                ('_barClass', '_TtC5VVebo11BaseBarView'), ('_plainViewClass', 'UIView'),
+                ('_cornerClass', 'UICornerConfiguration'), ('_blurButtonClass', '_TtC5VVebo10BlurButton')):
             self.q(self.symbols[variable], self.classes[name])
         self.q(self.symbols['_originalLayout'], LAYOUT)
         self.q(self.symbols['_originalStyle'], STYLE)
+        status_address = self.symbols['_statusReason']
+        self.q(status_address, struct.unpack('<Q', self.uc.mem_read(status_address, 8))[0] & 0xFFFFFFFFF)
         self.uc.hook_add(UC_HOOK_CODE, self.hook)
 
     def obj(self, cls, **kwargs):
@@ -108,6 +114,10 @@ class Model:
             return self.objects[pointer]['text']
         # CFConstantString contains a chained pointer to UTF-8 at +16.
         start = struct.unpack('<Q', self.uc.mem_read(pointer + 16, 8))[0] & 0xFFFFFFFFF
+        flags = struct.unpack('<Q', self.uc.mem_read(pointer + 8, 8))[0]
+        if flags & 0x10:
+            length = struct.unpack('<Q', self.uc.mem_read(pointer + 24, 8))[0]
+            return bytes(self.uc.mem_read(start, length * 2)).decode('utf-16-le')
         return self.cstr(start)
 
     def kind(self, obj, cls):
@@ -150,6 +160,23 @@ class Model:
         elif name == '_objc_setAssociatedObject':
             self.associations[x0, x1] = x2
             self.ret()
+        elif name == '_objc_storeStrong':
+            self.q(x0, x1)
+            self.ret()
+        elif name == '_objc_alloc':
+            self.ret(self.obj(self.objects[x0]['name']))
+        elif name == '_dispatch_time':
+            self.ret(x1)
+        elif name == '_dispatch_after_f':
+            self.events.append(('scheduled', x0, uc.reg_read(UC_ARM64_REG_X3)))
+            self.ret()
+        elif name == '_object_getClass':
+            if not x0:
+                self.ret(0)
+            else:
+                cls = self.objects[x0]['class']
+                if cls not in self.classes: self.classes[cls] = self.obj('Class', name=cls)
+                self.ret(self.classes[cls])
         elif name == '_NSClassFromString':
             self.ret(self.classes.get(self.string(x0), 0))
         elif name == '_sel_registerName':
@@ -173,10 +200,53 @@ class Model:
             elif sel == 'isKindOfClass:': value = int(self.kind(x0, x2))
             elif sel == 'respondsToSelector:': value = 1
             elif sel == 'superview': value = obj.get('parent', 0)
-            elif sel in ('subviews', 'windows'): value = self.obj('NSArray', items=obj.get('children', []))
+            elif sel == 'subviews': value = self.obj('NSArray', items=obj.get('children', []))
+            elif sel == 'windows': value = self.obj('NSArray', items=getattr(self, 'windows', []))
             elif sel == 'count': value = len(obj['items'])
             elif sel == 'objectAtIndex:': value = obj['items'][x2]
             elif sel == 'effect': value = obj['effect']
+            elif sel == 'isUserInteractionEnabled': value = int(obj.get('interactive', True))
+            elif sel == 'backgroundColor': value = obj.get('background', 0)
+            elif sel == 'isHidden': value = int(obj.get('hidden', False))
+            elif sel == 'setHidden:':
+                obj['hidden'] = bool(x2)
+                self.events.append(('setHidden', x0, bool(x2)))
+                value = 0
+            elif sel == 'numberWithBool:': value = self.obj('NSNumber', boolean=bool(x2))
+            elif sel == 'boolValue': value = int(obj['boolean'])
+            elif sel == 'capsuleConfiguration': value = self.obj('UICornerConfiguration')
+            elif sel == 'cornerConfiguration': value = obj.get('corner', 0)
+            elif sel == 'setCornerConfiguration:':
+                obj['corner'] = x2
+                value = 0
+            elif sel == 'bounds':
+                for reg, number in zip((UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3), (0., 0., 390., 844.)):
+                    uc.reg_write(reg, struct.unpack('<Q', struct.pack('<d', number))[0])
+                value = 0
+            elif sel == 'initWithFrame:':
+                obj['frame'] = tuple(struct.unpack('<d', uc.reg_read(reg).to_bytes(8, 'little'))[0] for reg in
+                    (UC_ARM64_REG_D0, UC_ARM64_REG_D1, UC_ARM64_REG_D2, UC_ARM64_REG_D3))
+                value = x0
+            elif sel == 'stringWithFormat:':
+                fmt = self.string(x2)
+                arg = struct.unpack('<Q', uc.mem_read(uc.reg_read(UC_ARM64_REG_SP), 8))[0]
+                text = fmt.replace('%lu', str(arg)) if '%lu' in fmt else fmt.replace('%@', self.string(arg))
+                value = self.obj('NSString', text=text)
+            elif sel in ('secondarySystemBackgroundColor', 'labelColor'): value = self.obj('UIColor')
+            elif sel.startswith('set') and sel in ('setText:', 'setNumberOfLines:', 'setTextAlignment:', 'setUserInteractionEnabled:', 'setBackgroundColor:', 'setTextColor:'):
+                obj[sel] = x2
+                value = 0
+            elif sel == 'addSubview:':
+                obj.setdefault('children', []).append(x2)
+                self.objects[x2]['parent'] = x0
+                self.events.append(('addSubview', x0, x2))
+                value = 0
+            elif sel == 'removeFromSuperview':
+                parent = obj.get('parent')
+                if parent: self.objects[parent]['children'].remove(x0)
+                obj['parent'] = 0
+                self.events.append(('removeFromSuperview', x0))
+                value = 0
             elif sel == 'setEffect:':
                 obj['effect'] = x2
                 self.events.append(('setEffect', x0, x2))
@@ -200,12 +270,21 @@ class Model:
 
     def setup_bar(self, inside=True, vibrancy=False):
         bar = self.obj('_TtC5VVebo6Tabbar' if inside else 'UIView')
+        self.bar = bar
         self.view = self.obj('_TtC5VVebo8BlurView', parent=bar)
         container = self.obj('UIView', parent=self.view)
+        self.container = container
         self.blur = self.obj('UIVibrancyEffect' if vibrancy else 'UIBlurEffect')
         self.effect = self.obj('UIVisualEffectView', parent=container, effect=self.blur)
         self.objects[self.view]['children'] = [container]
+        self.objects[bar]['children'] = [self.view]
         self.objects[container]['children'] = [self.effect]
+
+    def add_plate(self, **overrides):
+        plate = self.obj('UIView', parent=self.container, interactive=False, background=self.obj('UIColor'))
+        self.objects[plate].update(overrides)
+        self.objects[self.container]['children'].append(plate)
+        return plate
 
     def call(self, function, receiver=None):
         self.uc.reg_write(UC_ARM64_REG_SP, STACK + 0xFFF0)
@@ -233,6 +312,21 @@ def main():
     assert m.events.count(('factory',)) == 1, 'Repeated layout recreated the effect'
     m.reduced = True; m.call('_ApplyGlass')
     assert m.objects[m.effect]['effect'] == m.blur, 'Accessibility did not restore original blur'
+    assert m.objects[m.effect].get('corner', 0) == 0, 'Original corner configuration not restored'
+    m = Model(binary); m.setup_bar(); plate = m.add_plate()
+    child = m.obj('UILabel'); content = m.add_plate(children=[child])
+    interactive = m.add_plate(interactive=True)
+    initially_hidden = m.add_plate(hidden=True)
+    m.call('_ApplyGlass')
+    assert m.objects[plate]['hidden'] and m.objects[initially_hidden]['hidden']
+    assert not m.objects[content].get('hidden') and not m.objects[interactive].get('hidden')
+    assert m.objects[m.effect]['corner'] != 0
+    m.reduced = True; m.call('_ApplyGlass')
+    assert not m.objects[plate]['hidden'] and m.objects[initially_hidden]['hidden']
+    m = Model(binary); m.setup_bar(inside=False); plate = m.add_plate(); m.call('_ApplyGlass')
+    assert not m.objects[plate].get('hidden'), 'Unrelated color plate was hidden'
+    m = Model(binary); m.setup_bar(); m.objects[m.view]['parent'] = m.obj('_TtC5VVebo10BlurButton', parent=m.objects[m.view]['parent'])
+    m.call('_ApplyGlass'); assert m.objects[m.effect]['effect'] == m.blur, 'Nested button was restyled'
     for inside, vibrancy, reduced, main_thread in ((False, False, False, True),
             (True, True, False, True), (True, False, True, True), (True, False, False, False)):
         m = Model(binary); m.setup_bar(inside, vibrancy); m.reduced = reduced; m.main = main_thread
@@ -251,7 +345,21 @@ def main():
         assert len([e for e in m.events if e[0] == 'replace']) == expected
         m.call('_InstallGlass', receiver=0)
         assert len([e for e in m.events if e[0] == 'replace']) == expected
-    print('PASS: compiled ARM64 adapter scope, nested blur, vibrancy exclusion, idempotence, accessibility restore, original callback ABI/order, installation guards and stack/register checks.')
+    m = Model(binary); m.setup_bar(); m.add_plate()
+    window = m.obj('UIView', children=[m.bar]); m.objects[m.bar]['parent'] = window; m.windows = [window]
+    m.call('_InstallGlass', receiver=0)
+    m.call('_ShowStatus', receiver=0)
+    labels = [p for p, o in m.objects.items() if o['class'] == 'UILabel']
+    assert len(labels) == 1
+    label = labels[0]; info = m.objects[label]
+    assert info['frame'] == (16., 100., 358., 70.)
+    assert '背景替换' in m.string(info['setText:'])
+    assert info['setUserInteractionEnabled:'] == 0
+    assert label in m.objects[window]['children']
+    assert len([e for e in m.events if e[0] == 'scheduled']) == 1
+    m.call('_HideStatus', receiver=0)
+    assert label not in m.objects[window]['children']
+    print('PASS: compiled ARM64 adapter scope, nested blur, vibrancy/button exclusion, reversible structural color-plate removal, capsule configuration, idempotence, accessibility restore, original callback ABI/order, installation guards and stack/register checks.')
     print('LIMIT: Foundation/UIKit/ObjC runtime are modeled; rendering, actual lifecycle and device stability remain unverified.')
 
 

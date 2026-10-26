@@ -6,13 +6,15 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
-## 原生玻璃材质测试 A
+## 原生玻璃材质测试 B
 
-用户同意先尝试界面玻璃效果，会员修改停止。该包从 G 原包重新构建，新增独立的玻璃模块，**不包含失败的会员修改**。在 iOS 26 上仅尝试替换已有浮动栏的背景材质，布局、操作和微博内容保留；主程序全部 `__text` 与 G 相同。
+用户反馈 A 版界面没有玻璃效果。静态检查发现，原 BlurView 在模糊材质上方叠加了独立底色，常用配色 alpha 为 0.8；A 版只换材质，未处理该层，不能据此认定材质已可见或模块一定已执行。
 
-[下载玻璃 A 测试包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-a/downloads/VVebo-3.3.31-Glass-A.ipa) · [使用说明](downloads/VVebo-Glass-A-说明.txt) · [实现与检查](release/glass/README.md) · [源码包](downloads/VVebo-Glass-A-source.zip) · [校验值](downloads/VVebo-Glass-A-SHA256.json)
+[下载玻璃 B 测试包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-b/downloads/VVebo-3.3.31-Glass-B.ipa) · [说明](downloads/VVebo-Glass-B-说明.txt) · [实现与检查](release/glass/README.md) · [源码](downloads/VVebo-Glass-B-source.zip) · [校验值](downloads/VVebo-Glass-B-SHA256.json)
 
-桌面名称 **VVebo 玻璃A**，构建号 **4.1901**。用全能签完整重签后覆盖安装，不先卸载。旧系统保留原效果；开启“降低透明度”时保留/恢复原材质。**真实玻璃显示及稳定性待真机验证，不宣称整套界面已完成适配。** 云同步仍关闭。
+B 在目标栏原生玻璃存在时，可逆地隐藏其无交互、无子视图的原 UIView 底色层，并设置公开的原生胶囊圆角配置；不隐藏文字、按钮或其他页面底色。玻璃 B 每次启动约两秒后显示一条五秒的测试状态提示，说明是否执行了背景替换或未启用原因，提示不拦截触摸。
+
+桌面名称 **VVebo 玻璃B**，构建号 **4.1902**。仍从已验证 G 重建，不含会员实验；全能签完整重签后覆盖，不先卸载。旧系统和降低透明度保留原效果。**真实玻璃观感、完整 UIKit 生命周期与稳定性待真机验证**。A 文件保留作历史对照，未将 B 标记为正式可用。
 
 ## 本地 Pro 测试版已撤回
 

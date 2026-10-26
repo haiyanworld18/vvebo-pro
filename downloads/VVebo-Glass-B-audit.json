@@ -1,0 +1,52 @@
+{
+  "release": "1.1.0-glass.2",
+  "device_feedback_on_a": "No visible glass effect; no proof that A module was loaded",
+  "checks": {
+    "source_archive_reproduces_identical_framework_and_ipa": true,
+    "arm64_scope_plate_restoration_corner_and_callback_model_passed": true,
+    "status_banner_rectangle_parameters_and_removal_model_passed": true,
+    "status_fallback_messages_checked": true
+  },
+  "static_evidence": {
+    "blur_container_add": "0x37ce54",
+    "blur_effect_add": "0x37cf24",
+    "color_overlay_add": "0x37d034",
+    "color_provider": "0x1c752c -> 0x1cad80",
+    "common_color_alpha": 0.8,
+    "not_proven_to_be_only_cause": true
+  },
+  "import_providers": {
+    "_NSClassFromString": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSBundle": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSNumber": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSProcessInfo": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSString": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_NSThread": "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "_OBJC_CLASS_$_UIApplication": "/System/Library/Frameworks/UIKit.framework/UIKit",
+    "_UIAccessibilityIsReduceTransparencyEnabled": "/System/Library/Frameworks/UIKit.framework/UIKit",
+    "___CFConstantStringClassReference": "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
+    "__dispatch_main_q": "/usr/lib/libSystem.B.dylib",
+    "_class_getInstanceMethod": "/usr/lib/libobjc.A.dylib",
+    "_class_replaceMethod": "/usr/lib/libobjc.A.dylib",
+    "_dispatch_after_f": "/usr/lib/libSystem.B.dylib",
+    "_dispatch_async_f": "/usr/lib/libSystem.B.dylib",
+    "_dispatch_time": "/usr/lib/libSystem.B.dylib",
+    "_method_getImplementation": "/usr/lib/libobjc.A.dylib",
+    "_method_getTypeEncoding": "/usr/lib/libobjc.A.dylib",
+    "_objc_alloc": "/usr/lib/libobjc.A.dylib",
+    "_objc_getAssociatedObject": "/usr/lib/libobjc.A.dylib",
+    "_objc_msgSend": "/usr/lib/libobjc.A.dylib",
+    "_objc_release": "/usr/lib/libobjc.A.dylib",
+    "_objc_retain": "/usr/lib/libobjc.A.dylib",
+    "_objc_retainAutoreleasedReturnValue": "/usr/lib/libobjc.A.dylib",
+    "_objc_setAssociatedObject": "/usr/lib/libobjc.A.dylib",
+    "_object_getClass": "/usr/lib/libobjc.A.dylib",
+    "_sel_registerName": "/usr/lib/libobjc.A.dylib"
+  },
+  "device_verified": false,
+  "limitations": [
+    "ObjC/UIKit/Foundation calls are modeled",
+    "No claim of actual glass visibility or startup/signing stability",
+    "Status counts replacement operations rather than unique controls or successful rendering"
+  ]
+}
