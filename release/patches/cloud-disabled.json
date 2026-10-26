@@ -1,0 +1,214 @@
+{
+  "baseline": "Verified 15A; no B/C/D binary used",
+  "patches": [
+    {
+      "file_offset": 3184308,
+      "before": "b16f0994",
+      "after": "000080d2",
+      "purpose": "Leave unavailable cloud container nil; preserve constructor and local object fields"
+    },
+    {
+      "file_offset": 3185668,
+      "before": "5d6e0994",
+      "after": "000080d2",
+      "purpose": "Leave unavailable cloud container nil; preserve constructor and local object fields"
+    },
+    {
+      "file_offset": 3185932,
+      "before": "1b6e0994",
+      "after": "000080d2",
+      "purpose": "Leave unavailable cloud container nil; preserve constructor and local object fields"
+    },
+    {
+      "file_offset": 3187904,
+      "before": "2e6c0994",
+      "after": "000080d2",
+      "purpose": "Leave unavailable cloud container nil; preserve constructor and local object fields"
+    },
+    {
+      "file_offset": 3193456,
+      "before": "c2660994",
+      "after": "000080d2",
+      "purpose": "Leave unavailable cloud container nil; preserve constructor and local object fields"
+    },
+    {
+      "file_offset": 3194144,
+      "before": "16660994",
+      "after": "000080d2",
+      "purpose": "Leave unavailable cloud container nil; preserve constructor and local object fields"
+    },
+    {
+      "file_offset": 3168052,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3170288,
+      "before": "ff8301d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3171788,
+      "before": "ff0303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3172816,
+      "before": "ff0303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3177924,
+      "before": "ff0303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3178924,
+      "before": "ff0303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3180364,
+      "before": "ff0303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3188148,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3191296,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3221868,
+      "before": "ff8303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3227324,
+      "before": "ff4303d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3233628,
+      "before": "fc6fbaa9",
+      "after": "9b400914",
+      "purpose": "Cancel cloud config conversion/write; return retained unchanged input array"
+    },
+    {
+      "file_offset": 3299056,
+      "before": "fc6fbaa9",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3311492,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3314240,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3316128,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3317820,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3319512,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3321204,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3322896,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3324588,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3326280,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 3327964,
+      "before": "ff8302d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled native query/save helper; borrowed inputs and ignored Void result"
+    },
+    {
+      "file_offset": 2751328,
+      "before": "34180014",
+      "after": "c0035fd6",
+      "purpose": "Disabled feature entry: Objective-C syncCloud wrapper"
+    },
+    {
+      "file_offset": 2776112,
+      "before": "f85fbca9",
+      "after": "c0035fd6",
+      "purpose": "Disabled feature entry: AppDelegate native scheduled syncCloud; no arguments/completion"
+    },
+    {
+      "file_offset": 3187592,
+      "before": "ffc301d1",
+      "after": "c0035fd6",
+      "purpose": "Disabled feature entry: CloudCenter native checkStatus; Boolean input, no completion argument"
+    },
+    {
+      "file_offset": 3195892,
+      "before": "f657bda9",
+      "after": "c0035fd6",
+      "purpose": "Disabled feature entry: Objective-C checkStatus: wrapper"
+    },
+    {
+      "file_offset": 3216584,
+      "before": "e923b96d",
+      "after": "c0035fd6",
+      "purpose": "Disabled feature entry: Main-view cloud feed restore; no input completion argument"
+    }
+  ],
+  "operation_creator_functions_disabled": 23,
+  "master_entries_disabled": 5,
+  "borrowed_array_return_helper": "0x31575c",
+  "bridge_retain_stub": "0x5659c8",
+  "sha256": "421cf67f08d72165b06b45d207f4c000b9db155c0ad66b1ba81cc423206ff71f"
+}

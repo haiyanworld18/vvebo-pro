@@ -1,0 +1,13 @@
+{
+  "baseline": "User-confirmed E; F launch declaration experiment not included",
+  "baseline_sha256": "421cf67f08d72165b06b45d207f4c000b9db155c0ad66b1ba81cc423206ff71f",
+  "build_version_command_offset": "0x10f8",
+  "sdk_field_offset": "0x1108",
+  "declared_main_sdk_before": "15.5",
+  "declared_main_sdk_after": "18.0",
+  "actual_recompile": false,
+  "minimum_os": "14.0 unchanged",
+  "build": "4.1707",
+  "status": "Untested linked-SDK compatibility behavior experiment; may alter runtime behavior beyond screen geometry",
+  "sha256": "543f3c816da02bbef4ec6757058381114674e1abc0e3143ed7d87f47f472167c"
+}

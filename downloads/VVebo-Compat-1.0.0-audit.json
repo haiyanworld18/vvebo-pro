@@ -1,0 +1,19 @@
+{
+  "release": "1.0.0",
+  "baseline": "G",
+  "runtime_changes": false,
+  "checks": {
+    "repeat_build_byte_identical": true,
+    "rejects_resealed_native_code_change": true,
+    "rejects_modified_baseline": true,
+    "verification_active_with_python_O": true,
+    "personal_certificate_profile_log_candidates_in_ipa": 0,
+    "network_source_rebuild_matches_G": true
+  },
+  "network_framework_sha256": "75dfac48fb9bcb6f63b9148d300a2061d4e0424c958059834151f909e3fac0e3",
+  "network_source_toolchain": {
+    "compiler": "Zig 0.13",
+    "linker": "LLVM ld64.lld 19.1.7"
+  },
+  "scope": "Offline release validation and exact equality to user-confirmed runtime; not a separate device integration test"
+}

@@ -1,0 +1,27 @@
+{
+  "release": "1.0.0",
+  "app_version": "3.3.31",
+  "build": "4.1800",
+  "display_name": "VVebo",
+  "baseline": "User-confirmed G",
+  "checks": {
+    "exact_three_changed_files": true,
+    "main_code_and_load_commands_identical_to_g": true,
+    "all_frameworks_and_ui_assets_identical_to_g": true,
+    "cloud_disable_patches_preserved": true,
+    "display_sdk_declaration_preserved": true,
+    "original_bundle_id_and_entitlements_preserved": true,
+    "only_two_code_directory_hashes_refreshed": true,
+    "all_resource_hashes_and_code_pages_valid": true,
+    "test_metadata_removed": true
+  },
+  "device_evidence": "User confirmed E startup/profile functionality and G display; release package itself not independently device-tested",
+  "limitations": [
+    "iCloud sync remains disabled",
+    "Apple-trusted re-signing is required",
+    "Original app source is unavailable; this release maintains compatibility patches"
+  ],
+  "artifact": "VVebo-3.3.31-Compat-1.0.0.ipa",
+  "bytes": 22481407,
+  "sha256": "d7f3df23f3ce437ad8e2994caf10dac54b88c648606f72df3f6a17fc18d9caf0"
+}

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.zig-global-cache/
+.zig-local-cache/
+release/network/VVProfile15
+release/network/VVProfile15.o
+dist/
