@@ -1,0 +1,24 @@
+{
+  "purpose": "Preserve first-login fix and prioritize visible image loading, without altering purchase verification or frame-rate policy",
+  "baseline": "Pinned user-confirmed G binary",
+  "patches": [
+    {
+      "file_offset": "0x17d3dc",
+      "before": "d3010036",
+      "after": "1f2003d5",
+      "original_instruction": "tbz w19, #0, 0x10017d414",
+      "new_instruction": "nop",
+      "normal_login_fallthrough": "0x17d3e0",
+      "cloud_progress_entry": "0x17c884",
+      "reason": "A false/missing accountRestored preference previously reached the iCloud progress UI; the no-cloud build must use the existing normal login continuation"
+    },
+    {
+      "file_offset": "0x289d0",
+      "before": "22018052",
+      "after": "22038052",
+      "original_instruction": "mov w2, #9",
+      "new_instruction": "mov w2, #25",
+      "reason": "YYWebImageManager shared image queue: NSQualityOfServiceBackground to NSQualityOfServiceUserInitiated; retains respondsToSelector guard, asynchronous queue/cache and original URL/quality behavior"
+    }
+  ]
+}

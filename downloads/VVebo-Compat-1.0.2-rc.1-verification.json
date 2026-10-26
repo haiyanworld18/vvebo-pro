@@ -1,0 +1,32 @@
+{
+  "release": "1.0.2-rc.1",
+  "app_version": "3.3.31",
+  "build": "4.1802",
+  "display_name": "VVebo",
+  "baseline": "User-confirmed G",
+  "checks": {
+    "exact_three_changed_files": true,
+    "main_diff_exactly_declared_instruction_patches": true,
+    "patched_instruction_count": 2,
+    "all_frameworks_and_ui_assets_identical_to_g": true,
+    "cloud_disable_patches_preserved": true,
+    "display_sdk_declaration_preserved": true,
+    "existing_promotion_opt_in_preserved": true,
+    "purchase_and_receipt_code_preserved": true,
+    "original_bundle_id_and_entitlements_preserved": true,
+    "only_bundle_hashes_and_patched_code_pages_refreshed": true,
+    "all_resource_hashes_and_code_pages_valid": true,
+    "test_metadata_removed": true
+  },
+  "device_evidence": "User confirmed E startup/profile functionality and G display; startup UI fix and image-priority candidate require device confirmation; actual FPS has not been measured",
+  "limitations": [
+    "iCloud sync remains disabled",
+    "Apple-trusted re-signing is required",
+    "Image speed and FPS improvements are not established by offline tests",
+    "No purchase restoration fix or membership grant is included",
+    "Original app source is unavailable; this release maintains compatibility patches"
+  ],
+  "artifact": "VVebo-3.3.31-Compat-1.0.2-rc.1.ipa",
+  "bytes": 22481402,
+  "sha256": "07de4849412abb611341ef9727fb53492f571700a5298de70131fd2ca2751043"
+}

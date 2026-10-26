@@ -1,0 +1,20 @@
+{
+  "release": "1.0.2-rc.1",
+  "type": "image scheduling candidate",
+  "checks": {
+    "arm64_queue_qos_background_9_to_user_initiated_25": true,
+    "queue_setter_availability_fallback_preserved": true,
+    "cache_queue_wiring_and_cleanup_preserved": true,
+    "startup_login_route_test_passed": true,
+    "existing_promotion_opt_in_preserved": true,
+    "purchase_and_receipt_code_unchanged": true,
+    "source_archive_reproduces_identical_candidate": true
+  },
+  "not_measured": [
+    "network latency",
+    "image decode time",
+    "actual frame rate",
+    "power usage"
+  ],
+  "purchase_restoration": "Not changed; awaiting user-visible restore result; no membership status granted"
+}

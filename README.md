@@ -6,6 +6,14 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
+## 图片调度候选版 1.0.2-rc.1
+
+用户反馈所有微博列表缩略图偏慢，且已关闭系统低电量模式和限制帧速率。候选版保留 1.0.1 的首次云等待界面修复，将 YYWebImage 共享图片队列的优先级由后台提升为用户发起，保留异步加载、原缓存、URL 和清晰度。**下载速度与流畅度改善尚待真机对比，不能据离线测试称已提速。**
+
+[下载图片调度候选版](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.2-rc.1/downloads/VVebo-3.3.31-Compat-1.0.2-rc.1.ipa) · [候选版说明](downloads/VVebo-Compat-1.0.2-rc.1-说明.txt) · [候选版源码](downloads/VVebo-Compat-1.0.2-rc.1-source.zip) · [校验值](downloads/VVebo-Compat-1.0.2-rc.1-SHA256.json)
+
+候选版构建号 **4.1802**，继续使用全能签签名覆盖。原应用的 ProMotion 许可已经开启；候选版保留它，未声称强制 120 帧，也未改变系统帧率策略。App Store 恢复购买流程与收据代码保留，**本候选版未包含会员恢复修复或会员授权变更**；需结合恢复购买时的具体表现继续定位。正式版 1.0.1 和 G 原包保持不变。
+
 ## 安装
 
 在全能签重新导入正式版，用当前可用证书签名并覆盖安装。桌面名称为 **VVebo**，无需先卸载或清除本地数据。适用验证环境为 iPhone 17 Pro Max / iOS 26；其他设备尚未逐项验证。

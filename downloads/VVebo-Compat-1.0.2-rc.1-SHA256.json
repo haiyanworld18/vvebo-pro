@@ -1,0 +1,22 @@
+{
+  "VVebo-3.3.31-Compat-1.0.2-rc.1.ipa": {
+    "bytes": 22481402,
+    "sha256": "07de4849412abb611341ef9727fb53492f571700a5298de70131fd2ca2751043"
+  },
+  "VVebo-Compat-1.0.2-rc.1-source.zip": {
+    "bytes": 28617,
+    "sha256": "3d036cd3f874ad5421f42947fbc7df1c58ec700eb33926870ad01cae317ba1d7"
+  },
+  "VVebo-Compat-1.0.2-rc.1-verification.json": {
+    "bytes": 1432,
+    "sha256": "4176995625c999626132872057b209f7ac26f5d80296afbcf406d101cc2db3fe"
+  },
+  "VVebo-Compat-1.0.2-rc.1-audit.json": {
+    "bytes": 690,
+    "sha256": "e983acecebc6cfba5d2c2c2ef2efb17d8d7efc3e518efe4daf088705f1eb8ed8"
+  },
+  "VVebo-Compat-1.0.2-rc.1-说明.txt": {
+    "bytes": 1200,
+    "sha256": "4b1ef688c9c414a9a3a4925f0a21643fb02cc197337adcf905547eb9791e998d"
+  }
+}

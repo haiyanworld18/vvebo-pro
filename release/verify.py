@@ -21,6 +21,7 @@ def verify_release(baseline, target):
     info = plistlib.loads(files[INFO])
     require(info["CFBundleIdentifier"] == settings["bundle_id"], "Bundle ID changed")
     require(info["CFBundleShortVersionString"] == settings["app_version"], "App version changed")
+    require(info.get("CADisableMinimumFrameDurationOnPhone") is True, "Existing ProMotion opt-in changed")
     require(not any(key in info for key in TEST_KEYS), "Test markers remain")
     require(files[INFO] == release_info(old[INFO], settings), "Unplanned application settings")
     require(files[RESOURCES] == release_resources(old[RESOURCES], files[INFO]),
@@ -32,6 +33,8 @@ def verify_release(baseline, target):
             "Executable differs beyond the declared instruction patches")
     require(files[MAIN] == refresh_seal(expected_main, files[INFO], files[RESOURCES], patched_offsets),
             "Signature changed beyond bundle hashes and declared code pages")
+    require(files[MAIN][0x119000:0x126800] == old[MAIN][0x119000:0x126800],
+            "Existing purchase/receipt code changed")
     for name, value in plistlib.loads(files[RESOURCES])["files"].items():
         if APP + name in files:
             expected = value["hash"] if isinstance(value, dict) else value
@@ -50,12 +53,16 @@ def verify_release(baseline, target):
                 "all_frameworks_and_ui_assets_identical_to_g": True,
                 "cloud_disable_patches_preserved": True,
                 "display_sdk_declaration_preserved": True,
+                "existing_promotion_opt_in_preserved": True,
+                "purchase_and_receipt_code_preserved": True,
                 "original_bundle_id_and_entitlements_preserved": True,
                 "only_bundle_hashes_and_patched_code_pages_refreshed": True,
                 "all_resource_hashes_and_code_pages_valid": True,
                 "test_metadata_removed": True},
-            "device_evidence": "User confirmed E startup/profile functionality and G display; first-login cloud progress UI fix still requires device confirmation",
+            "device_evidence": "User confirmed E startup/profile functionality and G display; startup UI fix and image-priority candidate require device confirmation; actual FPS has not been measured",
             "limitations": ["iCloud sync remains disabled", "Apple-trusted re-signing is required",
+                            "Image speed and FPS improvements are not established by offline tests",
+                            "No purchase restoration fix or membership grant is included",
                             "Original app source is unavailable; this release maintains compatibility patches"]}
 
 
