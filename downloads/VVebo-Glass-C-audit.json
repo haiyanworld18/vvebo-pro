@@ -1,0 +1,24 @@
+{
+  "release": "1.1.0-glass.3",
+  "device_feedback_on_b": "User saw two replacement operations, but no visible glass effect",
+  "hypothesis": "Old SDK-linked compatibility behavior might suppress the intended appearance; unproven",
+  "checks": {
+    "source_archive_reproduces_identical_framework_and_ipa": true,
+    "glass_module_text_identical_to_b": true,
+    "original_main_text_identical_to_g": true,
+    "arm64_adapter_model_still_passed": true
+  },
+  "declaration_changes": {
+    "main_sdk": "18.0 -> 26.0",
+    "minimum_os_unchanged": "14.0",
+    "UIDesignRequiresCompatibility": false,
+    "original_DTSDK_build_metadata_preserved": true
+  },
+  "device_verified": false,
+  "limitations": [
+    "Not an SDK 26 rebuild",
+    "Does not prove UIKit compatibility mode caused the missing glass",
+    "SDK declaration may alter system appearance/layout behavior",
+    "Rendering, on-device startup and signing stability remain unverified"
+  ]
+}

@@ -6,15 +6,17 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
-## 原生玻璃材质测试 B
+## 玻璃 C：系统兼容声明对照版
 
-用户反馈 A 版界面没有玻璃效果。静态检查发现，原 BlurView 在模糊材质上方叠加了独立底色，常用配色 alpha 为 0.8；A 版只换材质，未处理该层，不能据此认定材质已可见或模块一定已执行。
+用户确认 B 显示“已执行两次替换”，但界面仍无变化。模块已经执行，不能继续将问题解释为未加载；替换次数也没有证明玻璃渲染成功。
 
-[下载玻璃 B 测试包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-b/downloads/VVebo-3.3.31-Glass-B.ipa) · [说明](downloads/VVebo-Glass-B-说明.txt) · [实现与检查](release/glass/README.md) · [源码](downloads/VVebo-Glass-B-source.zip) · [校验值](downloads/VVebo-Glass-B-SHA256.json)
+[下载玻璃 C 对照包](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/glass-v1.1.0-c/downloads/VVebo-3.3.31-Glass-C.ipa) · [说明](downloads/VVebo-Glass-C-说明.txt) · [实现与检查](release/glass/README.md) · [源码](downloads/VVebo-Glass-C-source.zip) · [校验值](downloads/VVebo-Glass-C-SHA256.json)
 
-B 在目标栏原生玻璃存在时，可逆地隐藏其无交互、无子视图的原 UIView 底色层，并设置公开的原生胶囊圆角配置；不隐藏文字、按钮或其他页面底色。玻璃 B 每次启动约两秒后显示一条五秒的测试状态提示，说明是否执行了背景替换或未启用原因，提示不拦截触摸。
+C 只验证新的兼容模式假设：主程序 SDK 兼容声明由 G/B 的 18.0 改为 26.0，并设置 UIDesignRequiresCompatibility=false。没有用 iOS 26 SDK 重编译原 App，也没有证明这两项一定能启用原生玻璃。玻璃模块的 __text 与 B 相同，仅提示标签改为 C；原主程序全部 __text、网络框架及原权限与 G 相同。
 
-桌面名称 **VVebo 玻璃B**，构建号 **4.1902**。仍从已验证 G 重建，不含会员实验；全能签完整重签后覆盖，不先卸载。旧系统和降低透明度保留原效果。**真实玻璃观感、完整 UIKit 生命周期与稳定性待真机验证**。A 文件保留作历史对照，未将 B 标记为正式可用。
+桌面名称 **VVebo 玻璃C**，构建号 **4.1903**。仅针对当前 iOS 26 新机测试，完整重签后覆盖，不先卸载。**新声明可能改变系统控件外观/布局，实际玻璃效果和稳定性未验证**。提示仍会出现，次数只代表替换操作。若仍无效果，不能把本次假设记作已解决，应回到真实视图或兼容状态的诊断。
+
+A：无视觉变化。B：执行两次替换但仍无视觉变化。二者保留在历史标签中，未作为已成功适配的版本。此实验不含会员修改，云同步仍关闭。
 
 ## 本地 Pro 测试版已撤回
 

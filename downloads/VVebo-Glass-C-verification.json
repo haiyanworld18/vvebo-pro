@@ -1,0 +1,23 @@
+{
+  "version": "1.1.0-glass.3",
+  "artifact": "VVebo-3.3.31-Glass-C.ipa",
+  "build": "4.1903",
+  "bytes": 22489734,
+  "sha256": "fd504cf04cd0491d83cbafbd0c4b77094cba1aa65b23448a82f686f0946f0f08",
+  "checks": {
+    "main_text_identical_to_g": true,
+    "main_header_only_changes_weak_load_and_sdk26_declaration": true,
+    "original_entitlements_preserved": true,
+    "network_framework_identical": true,
+    "original_frameworks_and_assets_identical": true,
+    "code_and_resource_seals_valid": true,
+    "no_membership_or_image_priority_patches": true
+  },
+  "limits": [
+    "Native effect rendering and stability require device testing",
+    "Glass only applies to existing BlurView backgrounds inside BaseBarView",
+    "SDK declaration is a compatibility experiment, not an SDK 26 rebuild",
+    "New system appearance/layout behavior is not validated; target is iOS 26",
+    "iCloud remains disabled"
+  ]
+}

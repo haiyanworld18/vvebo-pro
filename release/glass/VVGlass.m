@@ -189,9 +189,9 @@ static void ShowStatus(void *context) {
     }
     if (!window) return;
     NSString *message;
-    if (UIAccessibilityIsReduceTransparencyEnabled()) message = @"玻璃 B：系统开启了降低透明度";
-    else if (replacementCount) message = [NSString stringWithFormat:@"玻璃 B：已执行 %lu 次背景替换", replacementCount];
-    else message = [NSString stringWithFormat:@"玻璃 B：%@", statusReason];
+    if (UIAccessibilityIsReduceTransparencyEnabled()) message = @"玻璃 C：系统开启了降低透明度";
+    else if (replacementCount) message = [NSString stringWithFormat:@"玻璃 C：已执行 %lu 次背景替换", replacementCount];
+    else message = [NSString stringWithFormat:@"玻璃 C：%@", statusReason];
     CGRect bounds = window.bounds;
     if (bounds.size.width < 100) return;
     statusLabel = [[NSClassFromString(@"UILabel") alloc] initWithFrame:
