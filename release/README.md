@@ -2,7 +2,7 @@
 
 这里包含我们维护的网络补丁源码、精确二进制补丁清单，以及统一后的正式版打包工具。VVebo 原应用没有源码；这里不冒充原应用的完整 Xcode 工程。
 
-当前分支构建 1.0.3-localpro.1 本地 Pro 测试版，以用户确认可用的 G 包为固定输入，不重新编译原程序。工具校验底包 SHA256，按白名单应用首次登录界面、图片队列优先级和本地到期状态读取，共 6 处指令替换，并更新版本与签名哈希。正式版 1.0.1 的源码保留在 compat-v1.0.1 标签。
+当前默认构建已回退到 1.0.1，仅包含首次登录云等待界面修复。本地 Pro 测试版 1.0.3-localpro.1 被用户报告闪退，已撤回；下文会员实验仅保留用于问题调查，不能据离线模型通过认定其可在真机运行。推荐用户先覆盖回退到已验证的 G 包。
 
 ## 构建正式包
 
@@ -19,7 +19,7 @@ python3 release/build.py downloads/VVebo-3.3.31-iPhone17-Display-G.ipa /tmp/vveb
 独立复核：
 
 ```bash
-python3 release/verify.py downloads/VVebo-3.3.31-iPhone17-Display-G.ipa /tmp/vvebo-release/VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa
+python3 release/verify.py downloads/VVebo-3.3.31-iPhone17-Display-G.ipa /tmp/vvebo-release/VVebo-3.3.31-Compat-1.0.1.ipa
 ```
 
 发布校验包括：ZIP 完整性、精确三个变更文件、主程序代码签名前缀除白名单指令外完全相同、全部框架和资源相同、原权限与 Bundle ID 保留、仅两个签名特殊槽及补丁所在代码页哈希更新，以及所有代码页和资源哈希正确。检查使用显式异常，在 `python -O` 下同样生效。

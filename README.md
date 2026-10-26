@@ -6,15 +6,11 @@
 
 [下载正式兼容版 IPA](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.1/downloads/VVebo-3.3.31-Compat-1.0.1.ipa)
 
-## 本地 Pro 功能测试版 1.0.3-localpro.1
+## 本地 Pro 测试版已撤回
 
-按用户明确要求，解除当前客户端的本地 Pro 到期限制。统一的本地到期状态读取改用系统 NSDate.distantFuture，复用原程序的 Date 转换、Optional 处理及会员状态更新。**这是本地功能启用，不是恢复 App Store 购买或云端授权。**
+用户反馈 1.0.3-localpro.1 安装后再次闪退，该版本停止推荐。离线 ARM64 模型未覆盖这次真机故障，具体崩溃原因尚未确认，不将通过模型测试作为运行安全的依据。
 
-[下载本地 Pro 测试版](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/compat-v1.0.3-localpro.1/downloads/VVebo-3.3.31-Compat-1.0.3-localpro.1.ipa) · [说明](downloads/VVebo-Compat-1.0.3-localpro.1-说明.txt) · [源码](downloads/VVebo-Compat-1.0.3-localpro.1-source.zip) · [校验值](downloads/VVebo-Compat-1.0.3-localpro.1-SHA256.json)
-
-用全能签重新签名覆盖安装，桌面名称 **VVebo 本地Pro**，构建号 **4.1803**。无需再点“恢复购买”。保留主页、新机显示、首次云等待界面修复及图片调度候选改动。iCloud 仍关闭；依赖原服务的功能可能仍无法使用。
-
-相对 G，仅增加首次登录、图片队列优先级及本地状态读取这 6 处指令替换，全部依赖库和界面资源不变。ARM64 模型执行确认原状态更新流程得到“已启用、未到期、永久 Pro”，日期桥接、引用收尾及模型偏好数据保持一致；系统与 Combine 方法使用替身，实际会员页面及每项功能待真机确认。未生成或修改 App Store 收据，也未把本地状态写成真实订阅记录。
+请用全能签重新签名并覆盖安装[此前用户确认可用的 G 版](https://raw.githubusercontent.com/haiyanworld18/vvebo-pro/e97e673/downloads/VVebo-3.3.31-iPhone17-Display-G.ipa)，保留本地数据。G 保留主页、显示兼容处理和云同步禁用，不包含新增的本地 Pro 修改，会员问题尚未解决。历史测试文件仅留作差异核查，不应继续分发安装。
 
 ## 图片调度候选版 1.0.2-rc.1
 
